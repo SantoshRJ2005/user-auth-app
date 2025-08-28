@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Bookings | SharingYatra</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #ff6b4a;
+      --secondary-color: #2c3e50;
+      --light-gray: #f4f4f4;
+      --dark-gray: #555;
+      --white: #ffffff;
+      --success: #28a745;
+      --danger: #dc3545;
+      --info: #007bff;
+      --warning: #ffc107;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display: flex; background: var(--light-gray); }
+
+    /* --- Sidebar --- */
+    .sidebar { width: 250px; height: 100vh; background: var(--secondary-color); padding: 30px 20px; color: var(--white); position: fixed; top: 0; left: 0; }
+    .sidebar h2 { color: var(--primary-color); font-size: 24px; margin-bottom: 30px; }
+    .sidebar a { display: block; color: var(--white); text-decoration: none; padding: 10px; margin-bottom: 10px; border-left: 3px solid transparent; transition: all 0.3s ease; }
+    .sidebar a:hover, .sidebar a.active { color: var(--primary-color); border-left: 3px solid var(--primary-color); background: rgba(255,255,255,0.1); }
+    
+    /* --- Main Content --- */
+    .main { flex: 1; padding: 30px; margin-left: 250px; }
+    h1 { margin-bottom: 20px; color: var(--secondary-color); }
+
+    /* --- Table Styling --- */
+    .table-container { background: var(--white); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 15px; text-align: left; }
+    th { background-color: var(--secondary-color); color: var(--white); font-weight: 600; }
+    tr:nth-child(even) { background-color: var(--light-gray); }
+    td.actions-cell { display: flex; gap: 10px; align-items: center; }
+
+    /* --- Action Buttons --- */
+    .action-btn { padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: var(--white); transition: opacity 0.3s; }
+    .action-btn:hover { opacity: 0.8; }
+    .approve-btn { background-color: var(--success); }
+    .reject-btn { background-color: var(--danger); }
+    .edit-btn { background-color: var(--warning); }
+    .delete-btn { background-color: var(--danger); }
+
+    /* --- Assignment Form --- */
+    .assign-box { margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .assign-box select, .assign-box input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 150px; }
+    .assign-box button { padding: 8px 14px; background: var(--info); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+    /* --- Message/Alert Boxes --- */
+    .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 16px; }
+    .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+    /* --- Modal Styling --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: none; align-items: center; justify-content: center; }
+    .modal-content { background: var(--white); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-content h2 { color: var(--secondary-color); margin-bottom: 20px; }
+    .modal-content .form-group { margin-bottom: 15px; }
+    .modal-content label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--dark-gray); }
+    .modal-content input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .modal-actions { margin-top: 20px; text-align: right; }
+    .modal-actions button { padding: 10px 20px; margin-left: 10px; }
+    .btn-cancel { background: #6c757d; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>SharingYatra</h2>
+  <a href="/manageBooking" class="active">Manage Bookings</a>
+  <a href="/addDriver">Add Drivers</a>
+  <a href="/viewDriver">View Drivers</a>
+  <a href="#">Vehicles</a>
+  <a href="/dashboard">Profile</a>
+  <a href="/logout">Logout</a>
+</div>
+
+<div class="main">
+  <h1>Pending Ride Requests</h1>
+
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <% if (bookings.length === 0 && !error) { %>
+    <div class="alert alert-info">No pending requests found at the moment.</div>
+  <% } else { %>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Route</th>
+            <th>Date & Time</th>
+            <th>Requested On</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bookings.forEach(booking => { %>
+            <% const bookingDate = new Date(booking.date); %>
+            <% const requestDate = new Date(booking.requestDate); %>
+            <tr>
+              <td>
+                <strong><%= booking.name %></strong><br>
+                <small><%= booking.email %></small>
+              </td>
+              <td><%= booking.from %> → <%= booking.to %></td>
+              <td><%= bookingDate.toLocaleDateString('en-IN') %> at <%= bookingDate.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'}) %></td>
+              <td><%= requestDate.toLocaleString('en-IN') %></td>
+              <td class="actions-cell" data-id="<%= booking._id %>">
+                <% if (typeof drivers !== 'undefined' && drivers.length > 0) { %>
+                  <button class="action-btn approve-btn" title="Approve">
+                    <i class="fa-solid fa-check"></i> Approve
+                  </button>
+                <% } else { %>
+                   <a href="/addDriver" style="font-size: 12px; color: var(--info);">Add Driver to Approve</a>
+                <% } %>
+                
+                <button class="action-btn edit-btn" title="Edit" 
+                  data-id="<%= booking._id %>" 
+                  data-from="<%= booking.from %>" 
+                  data-to="<%= booking.to %>" 
+                  data-date="<%= booking.date.toISOString().slice(0, 16) %>">
+                  <i class="fa-solid fa-pencil"></i>
+                </button>
+
+                <button class="action-btn delete-btn" title="Delete" data-id="<%= booking._id %>">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+
+                <form action="/rejectbooking" method="POST" style="display: inline;">
+                  <input type="hidden" name="requestId" value="<%= booking._id %>">
+                  <button type="submit" class="action-btn reject-btn" title="Reject">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<div id="editModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Edit Booking Request</h2>
+    <form id="editForm" action="/editbooking" method="POST">
+      <input type="hidden" id="editRequestId" name="requestId">
+      <div class="form-group">
+        <label for="editFrom">From</label>
+        <input type="text" id="editFrom" name="from" required>
+      </div>
+      <div class="form-group">
+        <label for="editTo">To</label>
+        <input type="text" id="editTo" name="to" required>
+      </div>
+      <div class="form-group">
+        <label for="editDate">Date & Time</label>
+        <input type="datetime-local" id="editDate" name="date" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="action-btn btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+        <button type="submit" class="action-btn approve-btn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Confirm Deletion</h2>
+    <p>Are you sure you want to permanently delete this booking request? This action cannot be undone.</p>
+    <form id="deleteForm" action="/deletebooking" method="POST">
+      <input type="hidden" id="deleteRequestId" name="requestId">
+      <div class="modal-actions">
+        <button type="button" class="action-btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+        <button type="submit" class="action-btn delete-btn">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const agencyDrivers = <%- JSON.stringify(typeof drivers !== 'undefined' ? drivers : []) %>;
+
+function openModal(modalId) {
+  document.getElementById(modalId).style.display = 'flex';
+}
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // --- Approve Button Logic ---
+  document.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const parentCell = btn.closest('.actions-cell');
+      if (parentCell.querySelector('.assign-box')) return;
+      
+      if (agencyDrivers.length === 0) {
+        alert('You must add a driver before you can approve a booking.');
+        window.location.href = '/addDriver';
+        return;
+      }
+
+      const assignBox = document.createElement('div');
+      assignBox.className = 'assign-box';
+      const requestId = parentCell.getAttribute('data-id');
+      const driverOptions = agencyDrivers.map(d => `<option value="${d.fullName}">${d.fullName}</option>`).join('');
+
+      assignBox.innerHTML = `
+        <form action="/approvebooking" method="POST" style="display: contents;">
+          <input type="hidden" name="requestId" value="${requestId}">
+          <select name="driverName" required>
+            <option value="" disabled selected>Select a Driver</option>
+            ${driverOptions}
+          </select>
+          <input type="number" placeholder="Fare (₹)" name="fare" required>
+          <button type="submit">Assign Ride</button>
+        </form>
+      `;
+      parentCell.appendChild(assignBox);
+      btn.style.display = 'none'; // Hide approve button after clicking
+    });
+  });
+
+  // --- Edit Button Logic ---
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('editRequestId').value = btn.dataset.id;
+      document.getElementById('editFrom').value = btn.dataset.from;
+      document.getElementById('editTo').value = btn.dataset.to;
+      document.getElementById('editDate').value = btn.dataset.date;
+      openModal('editModal');
+    });
+  });
+
+  // --- Delete Button Logic ---
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('deleteRequestId').value = btn.dataset.id;
+      openModal('deleteModal');
+    });
+  });
+
+  // Close modals if overlay is clicked
+  window.onclick = function(event) {
+    if (event.target.classList.contains('modal-overlay')) {
+      closeModal('editModal');
+      closeModal('deleteModal');
+    }
+  }
+});
+</script>
+
+</body>
+</html>

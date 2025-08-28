@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Agency Profile | SharingYatra</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display: flex; background: #f4f4f4; }
+
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background: #2c3e50;
+      padding: 30px 20px;
+      color: white;
+    }
+    .sidebar h2 {
+      color: #ff6b4a;
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 10px 0;
+      margin-bottom: 10px;
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: #ff6b4a;
+      border-left: 3px solid #ff6b4a;
+      background: rgba(255, 255, 255, 0.1);
+      padding-left: 10px;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .profile-box {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+    }
+
+    .profile-item {
+      margin-bottom: 15px;
+    }
+
+    .profile-item span.label {
+      display: inline-block;
+      width: 140px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .logout-btn {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 10px 20px;
+      background: #dc3545;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>SharingYatra</h2>
+    <a href="/manageBooking">Manage Bookings</a>
+    <a href="/addDriver"> Add Drivers</a>
+    <a href="#">Vehicles</a>
+    <a href="#">Earnings</a>
+    <a href="dashboard" class="active">Profile</a>
+    <a href="/logout">Logout</a>
+  </div>
+
+  <div class="main">
+    <h1>Agency Profile</h1>
+
+    <div class="profile-box">
+      <div class="profile-item"><span class="label">Name:</span> <%= name %></div>
+      <div class="profile-item"><span class="label">Email:</span> <%= email %>
+    </div>
+      <div class="profile-item"><span class="label">Login ID:</span> <%= age %></div>
+
+      <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+  </div>
+
+</body>
+</html>

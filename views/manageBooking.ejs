@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Bookings | SharingYatra</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display: flex; background: #f4f4f4; }
+    .sidebar { width: 250px; height: 100vh; background: #2c3e50; padding: 30px 20px; color: white; position: fixed; top: 0; left: 0; }
+    .sidebar h2 { color: #ff6b4a; font-size: 24px; margin-bottom: 30px; }
+    .sidebar a { display: block; color: white; text-decoration: none; padding: 10px 0; margin-bottom: 10px; border-left: 3px solid transparent; transition: all 0.3s ease; }
+    .sidebar a:hover, .sidebar a.active { color: #ff6b4a; border-left: 3px solid #ff6b4a; background: rgba(255,255,255,0.1); padding-left: 10px; }
+    .main { flex: 1; padding: 30px; margin-left: 250px; }
+    h1 { margin-bottom: 20px; color: #2c3e50; }
+    .request { background: white; padding: 20px; border-left: 5px solid #ff6b4a; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .request h3 { margin-bottom: 8px; color: #2c3e50; }
+    .request p { margin-bottom: 6px; color: #555; }
+    .actions { margin-top: 10px; }
+    .approve-btn, .reject-btn { padding: 8px 14px; border: none; border-radius: 4px; margin-right: 10px; font-weight: bold; cursor: pointer; color: white; }
+    .approve-btn { background-color: #28a745; }
+    .reject-btn { background-color: #dc3545; }
+    .assign-box { margin-top: 15px; }
+    .assign-box select, .assign-box input { width: calc(50% - 10px); padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .assign-box button { padding: 8px 14px; background: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>SharingYatra</h2>
+  <a href="/manageBooking" class="active">Manage Bookings</a>
+  <a href="/addDriver">Add Drivers</a>
+  <a href="/viewDriver">view Drivers</a>
+  <a href="#">Vehicles</a>
+  <a href="#">Earnings</a>
+  <a href="/dashboard">Profile</a>
+  <a href="/logout">Logout</a>
+</div>
+
+<div class="main">
+  <h1>Pending Ride Requests</h1>
+
+  <% if (error) { %>
+    <p style="color: red;"><%= error %></p>
+  <% } %>
+
+  <% if (typeof drivers !== 'undefined' && drivers.length === 0) { %>
+    <p style="color: blue;">Please <a href="/addDriver">add a driver</a> first to approve bookings.</p>
+  <% } %>
+
+  <% if (bookings && bookings.length > 0) { %>
+    <% bookings.forEach(booking => { %>
+      
+      <% const bookingDate = new Date(booking.date); %>
+      <% const requestDate = new Date(booking.requestDate); %>
+
+      <div class="request" data-id="<%= booking._id %>">
+        <h3>User: <%= booking.name %></h3>
+        <p>Email: <%= booking.email %></p>
+        <p>Route: <%= booking.from %> → <%= booking.to %></p>
+        
+        <p>Date: <%= bookingDate.toLocaleDateString('en-IN') %> &nbsp;&nbsp; Time: <%= bookingDate.toLocaleTimeString('en-IN') %></p>
+        <p>Requested At: <%= requestDate.toLocaleString('en-IN') %></p>
+        
+        <div class="actions">
+          <button class="approve-btn">Approve</button>
+          <form action="/rejectbooking" method="POST" style="display: inline;">
+            <input type="hidden" name="requestId" value="<%= booking._id %>">
+            <button type="submit" class="reject-btn">Reject</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } else if (!error) { %>
+    <p style="color: gray;">No pending requests found.</p>
+  <% } %>
+</div>
+
+<script>
+const agencyDrivers = <%- JSON.stringify(typeof drivers !== 'undefined' ? drivers : []) %>;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const parent = btn.closest('.request');
+      if (parent.querySelector('.assign-box')) return;
+      
+      if (agencyDrivers.length === 0) {
+        alert('You must add a driver before you can approve a booking.');
+        return;
+      }
+
+      const assignBox = document.createElement('div');
+      assignBox.className = 'assign-box';
+
+      const form = document.createElement('form');
+      form.action = '/approvebooking';
+      form.method = 'POST';
+
+      const requestId = parent.getAttribute('data-id');
+
+      const driverOptions = agencyDrivers.map(driver => {
+        return `<option value="${driver.fullName}">${driver.fullName}</option>`;
+      }).join('');
+      
+      form.innerHTML = `
+        <input type="hidden" name="requestId" value="${requestId}">
+        <select name="driverName" required>
+          <option value="" disabled selected>Select a Driver</option>
+          ${driverOptions}
+        </select>
+        <input type="number" placeholder="Fare (₹)" name="fare" required>
+        <button type="submit">Assign Ride</button>
+      `;
+
+      assignBox.appendChild(form);
+      parent.querySelector('.actions').appendChild(assignBox);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
