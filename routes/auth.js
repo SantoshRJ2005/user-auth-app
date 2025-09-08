@@ -4,8 +4,7 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // --- Schemas ---
-// Assuming User schema is in '../models/User'
-const User = require('../models/User'); 
+const User = require('../models/User');
 
 const bookingSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -31,10 +30,30 @@ const driverSchema = new mongoose.Schema({
     address: { type: String, required: true },
     licenseNumber: { type: String, required: true, unique: true },
     agencyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    role: { type: String, default: 'driver' }
+    role: { type: String, default: 'driver' },
+    // ADDED: The vehicleDetails field to the schema
+   
 });
 
-// Password hashing middleware for Driver schema
+// --- Vehicle Schema ---
+const vehicleSchema = new mongoose.Schema({
+    vehicle_name: { type: String, required: true },
+    model: { type: String, required: true },
+    number_plate: { type: String, required: true, unique: true },
+    rc_number: { type: String, required: true, unique: true },
+    insurance_number: { type: String, required: true, unique: true },
+    owner_name: { type: String, required: true },
+    ac_type: { type: String, enum: ['AC', 'Non-AC', 'Both'], required: true },
+    vehicle_type: { type: String, enum: ['Premium', 'Normal', 'Sedan', 'SUV'], required: true },
+    max_capacity: { type: Number, required: true },
+    rate_per_km: { type: Number, required: true },
+    agencyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+
+const Vehicle = mongoose.model('Vehicle', vehicleSchema);
+
+
 driverSchema.pre('save', async function(next) {
     if (!this.isModified('password')) {
         return next();
@@ -51,9 +70,6 @@ function isAuthenticated(req, res, next) {
     if (req.session && req.session.userId) {
         return next();
     } else {
-        // Instead of redirecting, which can be problematic for API calls,
-        // you might consider sending a 401 Unauthorized status.
-        // But for a traditional web app, redirect is fine.
         return res.redirect('/login');
     }
 }
@@ -63,75 +79,119 @@ router.get('/', (req, res) => res.render('login', { message: '' }));
 router.get('/login', (req, res) => res.render('login', { message: '' }));
 router.get('/signup', (req, res) => res.render('signup', { message: '' }));
 
-// Renders the page to add a new driver
 router.get('/addDriver', isAuthenticated, (req, res) => {
-    res.render('addDriver'); 
+    res.render('addDriver');
 });
 
-// Fetches and displays the list of drivers for the logged-in agency
-// **FIXED and CONSOLIDATED ROUTE**
+router.get('/addVehicles', isAuthenticated, (req, res) => {
+    res.render('addVehicles');
+});
+
+
+router.get('/viewVechicles', isAuthenticated, (req, res) => {
+    res.render('viewVechicles');
+});
+// --- Add Vehicle Route ---
+router.post('/addvehicle', isAuthenticated, async (req, res) => {
+    try {
+        const {
+            vehicle_name, model, number_plate, rc_number,
+            insurance_number, owner_name, ac_type,
+            vehicle_type, max_capacity, rate_per_km
+        } = req.body;
+
+        // Check if number plate already exists
+        const existing = await Vehicle.findOne({ number_plate });
+        if (existing) {
+            return res.status(409).json({ message: 'Vehicle with this number plate already exists.' });
+        }
+
+        const newVehicle = new Vehicle({
+            vehicle_name,
+            model,
+            number_plate,
+            rc_number,
+            insurance_number,
+            owner_name,
+            ac_type,
+            vehicle_type,
+            max_capacity,
+            rate_per_km,
+            agencyId: req.session.userId
+        });
+
+        await newVehicle.save();
+        res.status(201).json({ message: 'Vehicle added successfully!' });
+
+    } catch (err) {
+        console.error("Error adding vehicle:", err);
+        res.status(500).json({ message: 'Server error. Please try again.' });
+    }
+});
+
+
+// CORRECTED /viewDriver ROUTE
 router.get('/viewDriver', isAuthenticated, async (req, res) => {
     try {
-        // Find all drivers that belong to the currently logged-in agency
-        const drivers = await Driver.find({ agencyId: req.session.userId })
-                                  .sort({ fullName: 1 }); // Sort alphabetically by name
+        // Fetch all drivers that belong to the currently logged-in agency
+        const agencyDrivers = await Driver.find({
+            agencyId: req.session.userId
+        }).sort({ fullName: 1 }); // Sort alphabetically by name
 
-        // Render the viewDriver page and pass the list of drivers to it
-        res.render('viewDriver', { 
-            drivers: drivers,
-            error: null // Pass null for error when successful
+        // Render the viewDriver page and pass the list of drivers
+        res.render('viewDriver', {
+            drivers: agencyDrivers,
+            error: null
         });
 
     } catch (err) {
         console.error("Error fetching drivers:", err);
-        // If an error occurs, render the same page but with an error message
-        res.render('viewDriver', { 
-            drivers: [], // Pass an empty array to prevent template errors
-            error: "Could not fetch the list of drivers. Please try again later."
+        // If an error occurs, render the page with an error message
+        res.render('viewDriver', {
+            drivers: [],
+            error: "Could not fetch the driver list. Please try again."
         });
     }
 });
 
-// Renders the page for a user to request a booking
+
 router.get('/booking-request', isAuthenticated, (req, res) => {
     res.render('bookingRequest', { message: '' });
 });
 
-// Fetches and displays booking requests and drivers for an agency to manage
-// **FIXED AND SECURED**
+
 router.get('/manageBooking', isAuthenticated, async (req, res) => {
     try {
         // Fetch pending bookings and the agency's drivers at the same time
         const [pendingBookings, agencyDrivers] = await Promise.all([
             Booking.find({
-                agencyId: req.session.userId, // <-- CRITICAL FIX: Only fetch bookings for THIS agency
+               
                 status: 'pending'
             }).sort({ requestDate: -1 }),
-            
+
             Driver.find({
-                agencyId: req.session.userId
+                agencyId: req.session.userId,
             }).select('fullName').sort({ fullName: 1 }) // Only get names, sort alphabetically
         ]);
 
         // Pass both lists to the template
-        res.render('manageBooking', { 
-            bookings: pendingBookings, 
-            drivers: agencyDrivers,
-            error: null 
+        res.render('manageBooking', {
+            bookings: pendingBookings,
+            drivers: agencyDrivers, // The new list of drivers
+            error: null
         });
 
     } catch (err) {
         console.error("Error fetching bookings or drivers:", err);
         // Pass empty arrays on error to prevent the template from crashing
-        res.render('manageBooking', { 
-            bookings: [], 
-            drivers: [], 
-            error: "Could not fetch booking requests or driver list." 
+        res.render('manageBooking', {
+            bookings: [],
+            drivers: [],
+            error: "Could not fetch booking requests or driver list."
         });
     }
 });
 
-// Renders the main user/agency dashboard
 router.get('/dashboard', isAuthenticated, (req, res) => {
     res.render('dashboard', {
         name: req.session.userName,
@@ -141,98 +201,75 @@ router.get('/dashboard', isAuthenticated, (req, res) => {
     });
 });
 
-// Logs the user out
 router.get('/logout', (req, res) => {
     req.session.destroy(err => {
-        if (err) {
-            // Log the error and redirect anyway
-            console.error("Session destruction error:", err);
-            return res.redirect('/dashboard');
-        }
-        res.clearCookie('connect.sid'); // The default session cookie name
+        if (err) return res.redirect('/dashboard');
+        res.clearCookie('connect.sid');
         res.redirect('/login');
     });
 });
 
 // --- POST Routes ---
-
-// Handles user/agency login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.render('login', { message: 'Invalid credentials.' });
-        }
+        if (!user) return res.render('login', { message: 'Invalid credentials.' });
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.render('login', { message: 'Invalid credentials.' });
-        }
+        if (!isMatch) return res.render('login', { message: 'Invalid credentials.' });
         req.session.userId = user._id;
         req.session.userName = user.name;
         req.session.userEmail = user.email;
         req.session.userAge = user.age || 'N/A';
-        req.session.userRole = user.role; 
-        
-        if (user.role === 'agency') {
-            res.redirect('/manageBooking');
-        } else {
-            res.redirect('/dashboard');
-        }
+        req.session.userRole = user.role;
+        if (user.role === 'agency') res.redirect('/manageBooking');
+        else res.redirect('/dashboard');
     } catch (err) {
-        console.error("Login error:", err);
         res.render('login', { message: 'Server error. Please try again.' });
     }
 });
 
-// Handles new user/agency registration
 router.post('/signup', async (req, res) => {
     try {
         const { name, email, password, age, role } = req.body;
         const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.render('signup', { message: 'User with that email already exists.' });
-        }
-        // Password will be hashed by the User model's pre-save hook (assuming it exists like the Driver one)
-        const user = new User({ name, email, password, age: Number(age) || undefined, role });
+        if (existingUser) return res.render('signup', { message: 'User with that email already exists.' });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ name, email, password: hashedPassword, age: Number(age) || undefined, role });
         await user.save();
         res.render('login', { message: 'Signup successful! Please log in.' });
     } catch (err) {
-        console.error("Signup error:", err);
         res.render('signup', { message: 'Server error. Please try again.' });
     }
 });
 
-// Handles a user submitting a new booking request
 router.post('/bookingrequest', isAuthenticated, async (req, res) => {
     try {
         const { from, to, date } = req.body;
-        // Note: This assigns the booking to the *first* agency found.
         const agency = await User.findOne({ role: "agency" });
-        if (!agency) {
-            return res.render('bookingRequest', { message: 'Sorry, no agencies are available at the moment.' });
-        }
-        const newBooking = new Booking({ 
-            name: req.session.userName, 
-            email: req.session.userEmail, 
-            from, 
-            to, 
-            date, 
-            agencyId: agency._id 
-        });
+        if (!agency) return res.render('bookingRequest', { message: 'Sorry, no agencies are available.' });
+        const newBooking = new Booking({ name: req.session.userName, email: req.session.userEmail, from, to, date, agencyId: agency._id });
         await newBooking.save();
         res.render('bookingRequest', { message: 'Booking request submitted successfully!' });
     } catch (err) {
-        console.error("Booking request error:", err);
         res.render('bookingRequest', { message: 'Error submitting booking. Please try again.' });
     }
 });
 
-// Handles an agency adding a new driver
-// This route is well-written and responds with JSON, suitable for fetch/AJAX calls from the frontend.
+router.post('/approvebooking', isAuthenticated, async (req, res) => {
+    try {
+        const { requestId, driverName, fare } = req.body;
+        await Booking.findOneAndUpdate({ _id: requestId, agencyId: req.session.userId }, { status: 'approved', driverName, fare });
+        res.redirect('/manageBooking');
+    } catch (err) {
+        res.redirect('/manageBooking');
+    }
+});
+
 router.post('/adddriver', isAuthenticated, async (req, res) => {
     const { fullName, age, gender, mobile, email, license, address, tempPassword } = req.body;
 
+    // Server-side validation
     if (!fullName || !age || !gender || !mobile || !email || !license || !address || !tempPassword) {
         return res.status(400).json({ message: 'Please fill out all required fields.' });
     }
@@ -256,11 +293,14 @@ router.post('/adddriver', isAuthenticated, async (req, res) => {
             mobile,
             address,
             licenseNumber: license,
-            agencyId: req.session.userId // Link driver to the logged-in agency
+            agencyId: req.session.userId, // Link driver to the logged-in agency
+            // ADDED: Saving the vehicle details
+        
         });
 
         await newDriver.save();
-        
+
+        // Respond with success
         res.status(201).json({ message: 'Driver registered successfully!' });
 
     } catch (err) {
@@ -269,34 +309,26 @@ router.post('/adddriver', isAuthenticated, async (req, res) => {
     }
 });
 
-// Handles an agency approving a booking
-router.post('/approvebooking', isAuthenticated, async (req, res) => {
-    try {
-        const { requestId, driverName, fare } = req.body;
-        await Booking.findOneAndUpdate(
-            { _id: requestId, agencyId: req.session.userId }, 
-            { status: 'approved', driverName, fare: Number(fare) }
-        );
-        res.redirect('/manageBooking');
-    } catch (err) {
-        console.error("Approve booking error:", err);
-        res.redirect('/manageBooking'); // Redirect even on error to avoid hanging
-    }
-});
-
-// Handles an agency rejecting a booking
 router.post('/rejectbooking', isAuthenticated, async (req, res) => {
     try {
         const { requestId } = req.body;
-        await Booking.findOneAndUpdate(
-            { _id: requestId, agencyId: req.session.userId }, 
-            { status: 'rejected' }
-        );
+        await Booking.findOneAndUpdate({ _id: requestId, agencyId: req.session.userId }, { status: 'rejected' });
         res.redirect('/manageBooking');
     } catch (err) {
-        console.error("Reject booking error:", err);
         res.redirect('/manageBooking');
     }
 });
+
+
+router.get('/viewVehicles', isAuthenticated, async (req, res) => {
+    try {
+        const vehicles = await Vehicle.find({ agencyId: req.session.userId }).sort({ createdAt: -1 });
+        res.render('viewVehicles', { vehicles, error: null });
+    } catch (err) {
+        console.error("Error fetching vehicles:", err);
+        res.render('viewVehicles', { vehicles: [], error: 'Could not fetch vehicles.' });
+    }
+});
+
 
 module.exports = router;
