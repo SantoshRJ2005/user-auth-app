@@ -16,7 +16,7 @@ const bookingSchema = new mongoose.Schema({
     status: { type: String, default: 'pending', enum: ['pending', 'approved', 'rejected'] },
     agencyId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     driverName: { type: String },
-    fare: { type: Number }
+    fare: { type: Number } 
 });
 const Booking = mongoose.model('Booking', bookingSchema);
 
@@ -103,7 +103,7 @@ router.post('/addvehicle', isAuthenticated, async (req, res) => {
         // Check if number plate already exists
         const existing = await Vehicle.findOne({ number_plate });
         if (existing) {
-            return res.status(409).json({ message: 'Vehicle with this number plate already exists.' });
+            return res.status(409).json({ message: 'Vehicle with this number plate already exists. ' });
         }
 
         const newVehicle = new Vehicle({
@@ -125,7 +125,7 @@ router.post('/addvehicle', isAuthenticated, async (req, res) => {
 
     } catch (err) {
         console.error("Error adding vehicle:", err);
-        res.status(500).json({ message: 'Server error. Please try again.' });
+        res.status(500).json({ message: 'Server error. Please try again. connection' });
     }
 });
 
@@ -332,3 +332,4 @@ router.get('/viewVehicles', isAuthenticated, async (req, res) => {
 
 
 module.exports = router;
+
