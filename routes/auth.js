@@ -166,7 +166,7 @@ router.get('/manageBooking', isAuthenticated, async (req, res) => {
         const [pendingBookings, agencyDrivers] = await Promise.all([
             Booking.find({
                
-                status: 'pending'
+                status: 'pending' 
             }).sort({ requestDate: -1 }),
 
             Driver.find({
