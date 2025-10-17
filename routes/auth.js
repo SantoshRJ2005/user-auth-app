@@ -223,7 +223,7 @@ router.post('/login', async (req, res) => {
         req.session.userAge = user.age || 'N/A';
         req.session.userRole = user.role;
         if (user.role === 'agency') res.redirect('/manageBooking');
-        else res.redirect('/dashboard');
+        else res.redirect('/manageBooking');
     } catch (err) {
         res.render('login', { message: 'Server error. Please try again.' });
     }
@@ -332,4 +332,5 @@ router.get('/viewVehicles', isAuthenticated, async (req, res) => {
 
 
 module.exports = router;
+
 
