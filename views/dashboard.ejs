@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agency Dashboard | SharingYatra</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6b4a;
+            --secondary-color: #2c3e50;
+            --light-gray: #f4f7f6;
+            --dark-gray: #555;
+            --white: #ffffff;
+            --border-color: #e0e0e0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; background: var(--light-gray); }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: var(--secondary-color);
+            padding: 30px 20px;
+            color: white;
+            position: fixed;
+        }
+        .sidebar h2 { color: var(--primary-color); font-size: 24px; margin-bottom: 30px; }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            color: var(--white);
+            background: var(--primary-color);
+        }
+
+        .main { flex: 1; padding: 30px; margin-left: 250px; }
+        h1 { margin-bottom: 25px; color: var(--secondary-color); font-size: 2rem; }
+
+        .profile-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            max-width: 900px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            background-color: #fff0ec;
+            padding: 15px;
+            border-radius: 50%;
+        }
+        .header-text h2 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .header-text p {
+            color: var(--dark-gray);
+            margin: 0;
+        }
+        
+        .profile-body {
+            padding: 30px;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .detail-item .icon {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 3px;
+            width: 20px;
+            text-align: center;
+        }
+        .detail-item .text .label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .detail-item .text .value {
+            color: var(--dark-gray);
+        }
+        .document-link {
+            /* Updated style to match brand */
+            color: var(--primary-color); 
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .document-link:hover { text-decoration: underline; }
+        
+        @media (max-width: 900px) {
+            .details-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>SharingYatra</h2>
+    <a href="/manageBooking"><i class="fa-solid fa-tasks"></i> Manage Bookings</a>
+    <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
+    <a href="/viewVehicles"><i class="fa-solid fa-car"></i> Vehicles</a>
+    <a href="#"><i class="fa-solid fa-chart-line"></i> Earnings</a>
+    <a href="/dashboard" class="active"><i class="fa-solid fa-id-card"></i> Profile</a>
+    <a href="/logout"><i class="fa-solid fa-sign-out-alt"></i> Logout</a>
+</div>
+
+<div class="main">
+    <h1>Agency Dashboard</h1>
+    <div class="profile-card">
+        <div class="profile-header">
+            <i class="fa-solid fa-building header-icon"></i>
+            <div class="header-text">
+                <h2><%= agency.agencyName %></h2>
+                <p>Welcome to your agency profile dashboard.</p>
+            </div>
+        </div>
+
+        <div class="profile-body">
+            <div class="details-grid">
+                <div class="detail-item">
+                    <i class="fa-solid fa-user-tie icon"></i>
+                    <div class="text">
+                        <span class="label">Owner Name</span>
+                        <span class="value"><%= agency.ownerName %></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fa-solid fa-envelope icon"></i>
+                    <div class="text">
+                        <span class="label">Email Address</span>
+                        <span class="value"><%= agency.email %></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fa-solid fa-phone icon"></i>
+                    <div class="text">
+                        <span class="label">Mobile Number</span>
+                        <span class="value"><%= agency.agencyMobile %></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fa-solid fa-map-marker-alt icon"></i>
+                    <div class="text">
+                        <span class="label">Operating Station</span>
+                        <span class="value"><%= agency.oprateStation %></span>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fa-solid fa-id-card icon"></i>
+                    <div class="text">
+                        <span class="label">Agency License No.</span>
+                        <span class="value"><%= agency.agencyLicense %></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fa-solid fa-file-invoice-dollar icon"></i>
+                    <div class="text">
+                        <span class="label">GST Number</span>
+                        <span class="value"><%= agency.gstNumber %></span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fa-solid fa-address-card icon"></i>
+                    <div class="text">
+                        <span class="label">PAN Number</span>
+                        <span class="value"><%= agency.panNumber %></span>
+                    </div>
+                </div>
+                    
+                <div class="detail-item">
+                    <i class="fa-solid fa-file-alt icon"></i>
+                    <div class="text">
+                        <span class="label">Gumasta License</span>
+                        <span class="value">
+                            
+                            <% if (agency.gumastaLicenseUrl) { %>
+                                <a href="<%= agency.gumastaLicenseUrl %>" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="document-link">
+                                    
+                                    View Document <i class="fa-solid fa-external-link-alt fa-xs"></i>
+                                </a>
+                            <% } else { %>
+                                Not Provided
+                            <% } %>
+                            
+                        </span>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

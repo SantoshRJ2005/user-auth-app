@@ -1,0 +1,16 @@
+<h2>Login for Sharing Yatra</h2>
+
+<%# This EJS block checks if the 'message' variable was passed from the server and is not empty. %>
+<%# It will only display the <p> tag if there is an error message to show. %>
+<% if (typeof message !== 'undefined' && message) { %>
+    <p style='color:red;'><%= message %></p>
+<% } %>
+
+<form action='/login' method='POST'>
+    Email: <input type='email' name='email' required><br>
+    Password: <input type='password' name='password' required><br>
+    <button type='submit'>Login</button>
+</form>
+
+
+<a href='/signup'>Don't have an account? Sign Up</a>
