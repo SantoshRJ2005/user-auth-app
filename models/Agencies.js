@@ -12,11 +12,11 @@ const agencySchema = new mongoose.Schema({
     agencyName: { type: String },
     ownerName: { type: String },
     oprateStation: { type:String },
-    agencyEmail: { type: String, unique: true, sparse: true, trim: true, lowercase: true }, // For Agency login
-    agencyMobile: { type: String, unique: true, sparse: true }, 
-    agencyLicense: { type: String, unique: true, sparse: true },
-    gstNumber: { type: String, unique: true, sparse: true },
-    panNumber: { type: String, unique: true, sparse: true },
+    agencyEmail: { type: String,  sparse: true, trim: true, lowercase: true }, 
+    agencyMobile: { type: String,  sparse: true }, 
+    agencyLicense: { type: String,  sparse: true },
+    gstNumber: { type: String, sparse: true },
+    panNumber: { type: String,  sparse: true },
     gumastaLicenseUrl: { type: String }
 
 }, { timestamps: true });
