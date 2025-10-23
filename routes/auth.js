@@ -1,5 +1,3 @@
-// routes/auth.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -213,18 +211,21 @@ router.post('/register-agency', uploadMemory.single('gumastaLicense'), async (re
             return res.status(400).json({ message: 'Gumasta License file is required.' });
         }
 
-        const existingAgency = await Agencies.findOne({
-            $or: [
-                { agencyEmail },
-                { agencyMobile }, 
-                { gstNumber }, 
-                { panNumber }
-            ]
-        });
+        // --- FIX START: More robust duplicate check ---
+        // Build a query to check for duplicates only on non-empty fields
+        // const orQuery = [
+        //     { agencyEmail } // Email is always required and checked
+        // ];
+        // if (agencyMobile) orQuery.push({ agencyMobile });
+        // if (gstNumber) orQuery.push({ gstNumber });
+        // if (panNumber) orQuery.push({ panNumber });
 
-        if (existingAgency) {
-            return res.status(409).json({ message: 'An agency with this email, mobile, GST, or PAN already exists.' });
-        }
+        // const existingAgency = await Agencies.findOne({ $or: orQuery });
+        // // --- FIX END ---
+
+        // if (existingAgency) {
+        //     return res.status(409).json({ message: 'An agency with this email, mobile, GST, or PAN already exists.' });
+        // }
 
         const newAgency = new Agencies({
             agencyEmail,
@@ -341,22 +342,52 @@ router.post('/deleteDriver', isAuthenticated, async (req, res) => {
 });
 
 
+// --- FIX START: Corrected /addvehicle route ---
 router.post('/addvehicle', isAuthenticated, async (req, res) => {
     const { vehicle_name, model, number_plate, rc_number, insurance_number, owner_name, ac_type, vehicle_type, max_capacity, rate_per_km } = req.body;
+    
+
+    const vehicleNumber = number_plate;
+
     try {
-        if (await Vehicle.findOne({ number_plate })) {
+        // Check for duplicates on the field with the unique index
+        if (!vehicleNumber) {
+             return res.status(400).json({ message: 'Number plate is required.' });
+        }
+
+        // Check if a vehicle with this number plate already exists
+        // We check 'vehicleNumber' field because that's where the unique index is
+        if (await Vehicle.findOne({ number_plate: vehicleNumber })) {
             return res.status(409).json({ message: 'Vehicle with this number plate already exists.' });
         }
+        
         await new Vehicle({
-            vehicle_name, model, number_plate, rc_number, insurance_number, owner_name, ac_type, vehicle_type, max_capacity, rate_per_km,
+            vehicle_name, 
+            model, 
+            number_plate: vehicleNumber,    // The field from your screenshot
+            vehicleNumber: vehicleNumber,  // The field from the error log's index
+            rc_number, 
+            insurance_number, 
+            owner_name, 
+            ac_type, 
+            vehicle_type, 
+            max_capacity, 
+            rate_per_km,
             agencyId: req.session.AgenciesId
         }).save();
+
         res.status(201).json({ message: 'Vehicle added successfully!' });
+
     } catch (err) {
         console.error("Error adding vehicle:", err);
+        // Handle the duplicate error gracefully
+        if (err.code === 11000) {
+            return res.status(409).json({ message: 'A vehicle with this number plate already exists.' });
+        }
         res.status(500).json({ message: 'Server error. Please try again.' });
     }
 });
+// --- FIX END ---
 
 router.post('/bookingrequest', isAuthenticated, async (req, res) => {
     try {
