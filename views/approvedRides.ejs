@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approved Rides | SharingYatra</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --- Root Variables --- */
+    :root {
+      --primary-color: #ff6b4a;
+      --secondary-color: #2c3e50;
+      --bg-light: #f7f8fc;
+      --text-dark: #333;
+      --text-light: #667;
+      --white: #ffffff;
+      --border-color: #dfe6f0;
+      --success: #28a745;
+      --danger: #dc3545;
+      --info: #007bff;
+      /* Added back for status badges */
+      --warning: #ffc107; 
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background: var(--bg-light);
+    }
+
+    /* --- Sidebar (From your provided code) --- */
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background: var(--secondary-color);
+      padding: 30px 20px;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar .logo {
+      color: var(--primary-color);
+      font-size: 26px; /* Your size */
+      font-weight: 700;
+      margin-bottom: 35px; /* Your margin */
+      padding-left: 5px; /* Your padding */
+      text-align: center; /* Centered logo */
+    }
+    .sidebar nav { flex: 1; }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      text-decoration: none;
+      padding: 12px 10px;
+      margin-bottom: 10px;
+      border-radius: 8px; /* Your radius */
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .sidebar a i { 
+        width: 20px; 
+        text-align: center;
+        font-size: 0.95rem; /* Aligns icons better */
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
+      background: rgba(255, 255, 255, 0.05); /* Your background */
+    }
+    .sidebar .logout { 
+        margin-top: 20px; /* Pushes from nav */
+    }
+
+    /* --- Main Content --- */
+    .main {
+      flex: 1;
+      padding: 30px;
+      margin-left: 250px;
+    }
+    .main h1 {
+      margin-bottom: 25px;
+      color: var(--secondary-color);
+      font-size: 2.2rem; /* Adjusted size */
+      font-weight: 700;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color); /* Using new var */
+    }
+    
+    /* --- Table Container --- */
+    .table-container { 
+      background: var(--white); 
+      border-radius: 12px; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+      overflow: hidden; 
+      border: 1px solid var(--border-color); /* Added border */
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+
+    /* --- Table Header --- */
+    th { 
+      background-color: #fafbfc; 
+      color: var(--text-light); /* Using new var */
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 20px 24px; 
+      text-align: left;
+    }
+    
+    /* --- Table Body --- */
+    td {
+      padding: 20px 24px;
+      font-weight: 500;
+      color: var(--text-dark); /* Using new var */
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    
+    tbody tr {
+      border-bottom: 1px solid var(--border-color); /* Using new var */
+      transition: background-color 0.2s ease;
+    }
+    
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+    
+    tbody tr:hover {
+      background-color: #fcfcfc;
+    }
+    
+    /* Style for N/A text */
+    .na {
+      color: var(--text-light);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* --- Alerts (From your provided code) --- */
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+    .alert-error { /* Renamed from alert-danger */
+      color: #721c24;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+    .alert-info {
+      color: #004085;
+      background-color: #cce5ff;
+      border: 1px solid #b8daff;
+    }
+    .alert-info a { color: #004085; font-weight: 600; }
+
+    /* --- Status Badges --- */
+    .status-cell {
+      text-transform: capitalize;
+    }
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--white);
+    }
+    .status-completed {
+      background-color: var(--success);
+    }
+    /* Kept the light blue 'approved' status */
+    .status-approved {
+     background-color:rgb(228, 63, 63); /* Light blue */
+      color: #f5e508;
+    }
+    .status-pending {
+      background-color: var(--warning);
+      color: var(--text-dark);
+    }
+    .status-ongoing {
+      background-color: var(--info);
+    }
+    .status-rejected,
+    .status-cancelled {
+      background-color: var(--danger);
+    }
+
+    /* --- Responsive Design (From your provided code) --- */
+    @media (max-width: 992px) {
+      body { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        /* Allow horizontal scrolling on small viewports */
+        overflow-x: auto; 
+        padding: 10px 15px;
+      }
+      .sidebar .logo { 
+        margin-bottom: 0; 
+        margin-right: 20px;
+        font-size: 22px; /* Smaller logo for mobile */
+      }
+      .sidebar nav { 
+        display: flex; 
+        flex: 1; 
+      }
+      .sidebar a { 
+        margin-bottom: 0; 
+        flex-shrink: 0; /* Prevent links from shrinking */
+        padding: 10px;
+      }
+      .sidebar .logout { 
+        margin-top: 0; 
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      .main { margin-left: 0; padding: 20px; }
+      .main h1 { font-size: 1.8rem; }
+    }
+    
+    @media (max-width: 768px) {
+        /* This will make the table horizontally scrollable */
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            min-width: 700px; /* Force table to be wide */
+        }
+        .main h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">SharingYatra</div> 
+  <nav>
+    <a href="/manageBooking"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>
+    <a href="/approvedRides" class="active"><i class="fa-solid fa-check-double"></i> Approved</a>
+    <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
+    <a href="/viewDriver"><i class="fa-solid fa-users"></i> View Drivers</a>
+    <a href="/addVehicles"><i class="fa-solid fa-car"></i> Add Vehicles</a>
+    <a href="/viewVehicles"><i class="fa-solid fa-car-side"></i> View Vehicles</a>
+    <a href="#"><i class="fa-solid fa-chart-line"></i> Earnings</a>
+    <a href="/dashboard"><i class="fa-solid fa-user-circle"></i> Profile</a>
+  </nav>
+
+  <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+</div>
+
+<div class="main">
+  <h1>View All Approved Rides</h1>
+  
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+  
+  <% if (approvedList.length === 0 && !error) { %>
+    <div class="alert alert-info">No approved rides found.</div>
+  <% } else { %>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer Name</th>
+            <th>Phone Number</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Ride Date</th>
+            <th>Driver Name</th>
+            <th>Fare (₹)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% approvedList.forEach(list => { %>
+            <tr>
+              <td><%= list.customerName || list.name %></td>
+              <td><%= list.mobile || '' %></td>
+              <td><%= list.from || '' %></td>
+              <td><%= list.to || '' %></td>
+              <td><%= new Date(list.date).toLocaleDateString('en-IN') %></td>
+              
+              <td><%- list.driverName || '<span class="na">N/A</span>' %></td>
+              
+              <td><%- list.fare ? '₹' + list.fare : '<span class="na">N/A</span>' %></td>
+              
+              <td class="status-cell">
+                <span class="status-badge status-<%= (list.status || 'pending').toLowerCase() %>">
+                  <%= list.status %>
+                </span>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+</body>
+</html>

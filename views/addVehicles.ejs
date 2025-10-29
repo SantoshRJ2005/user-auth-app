@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Vehicle - Agency Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #0f172a; color: #ffffff; }
+        .spinner { border: 2px solid rgba(255, 255, 255, 0.2); width: 16px; height: 16px; border-radius: 50%; border-left-color: #ffffff; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .input-error { border-color: #ef4444; background-color: #fee2e2; }
+        .input-error:focus { border-color: #ef4444; --tw-ring-color: #ef4444; }
+        .error-message { color: #dc2626; font-size: 0.875rem; margin-top: 0.25rem; }
+        .sidebar { transition: transform 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+<div class="flex h-screen">
+    <div id="sidebar" class="fixed inset-y-0 left-0 bg-slate-800 text-slate-300 w-64 space-y-6 py-7 px-2 transform -translate-x-full lg:translate-x-0 z-30">
+        <a href="#" class="text-white text-2xl font-extrabold px-4">SharingYatra</a>
+        <nav>
+            <a href="/manageBooking" class="sidebar-link block py-2.5 px-4 rounded">Manage Bookings</a>
+            <a href="/addDriver" class="sidebar-link block py-2.5 px-4 rounded active">Add Drivers</a>
+            <a href="#" class="sidebar-link block py-2.5 px-4 rounded">Vehicles</a>
+            <a href="#" class="sidebar-link block py-2.5 px-4 rounded">Earnings</a>
+            <a href="/dashboard" class="sidebar-link block py-2.5 px-4 rounded">Profile</a>
+            <a href="/logout" class="sidebar-link block py-2.5 px-4 rounded">Logout</a>
+        </nav>
+    </div>
+
+    <div class="flex-1 flex flex-col overflow-hidden lg:ml-64">
+        <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 flex-shrink-0">
+            <button id="menu-button" class="lg:hidden text-slate-500 hover:text-slate-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold text-slate-800">Add New Vehicle</h2>
+            <div class="w-6"></div>
+        </header>
+        
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div class="bg-white rounded-2xl shadow-md p-6 sm:p-8 max-w-4xl mx-auto">
+                <div id="messageArea" class="mb-6"></div>
+                
+                <form id="addVehicleForm" class="space-y-8" novalidate>
+                    <fieldset>
+                        <legend class="text-xl font-semibold text-slate-800 mb-4 border-b pb-3">Vehicle Details</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="vehicle_name" class="block text-sm font-medium text-slate-700 mb-1">Vehicle Name</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13h18M3 18h18M3 8h18"></path></svg></div><input type="text" id="vehicle_name" name="vehicle_name" required placeholder="e.g., Toyota Innova" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="model" class="block text-sm font-medium text-slate-700 mb-1">Model</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div><input type="text" id="model" name="model" required placeholder="e.g., 2023" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="number_plate" class="block text-sm font-medium text-slate-700 mb-1">Number Plate</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5 5-5-5"></path></svg></div><input type="text" id="number_plate" name="number_plate" required placeholder="e.g., MH 12 AB 1234" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="rc_number" class="block text-sm font-medium text-slate-700 mb-1">RC Number</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-4 0h4"></path></svg></div><input type="text" id="rc_number" name="rc_number" required placeholder="e.g., MH1420230001234" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="insurance_number" class="block text-sm font-medium text-slate-700 mb-1">Insurance Number</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><input type="text" id="insurance_number" name="insurance_number" required placeholder="e.g., 1234567890" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="owner_name" class="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div><input type="text" id="owner_name" name="owner_name" required placeholder="e.g., John Doe" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="ac_type" class="block text-sm font-medium text-slate-700 mb-1">AC Type</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                                    <select id="ac_type" name="ac_type" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="" disabled selected>Select AC Type</option>
+                                        <option value="AC">AC</option>
+                                        <option value="Non-AC">Non-AC</option>
+                                        <option value="Both">Both</option>
+                                    </select>
+                                </div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="vehicle_type" class="block text-sm font-medium text-slate-700 mb-1">Vehicle Type</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></div>
+                                    <select id="vehicle_type" name="vehicle_type" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="" disabled selected>Select Vehicle Type</option>
+                                        <option value="Premium">Premium</option>
+                                        <option value="Normal">Normal</option>
+                                        <option value="Sedan">Sedan</option>
+                                        <option value="SUV">SUV</option>
+                                    </select>
+                                </div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                             <div>
+                                <label for="max_capacity" class="block text-sm font-medium text-slate-700 mb-1">Max Capacity</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20l-5-5-5 5"></path></svg></div>
+                                    <select id="max_capacity" name="max_capacity" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="" disabled selected>Select Max Capacity</option>
+                                        <option value="4">4</option>
+                                        <option value="6">6</option>
+                                        <option value="8">8</option>
+                                        <option value="12">12</option>
+                                    </select>
+                                </div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                            <div>
+                                <label for="rate_per_km" class="block text-sm font-medium text-slate-700 mb-1">Rate per Km</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 12a4 4 0 11-8 0 4 4 0 018 0zm-8 12a1 1 0 100-2 1 1 0 000 2zm-12 0a1 1 0 100-2 1 1 0 000 2z"></path></svg></div>
+                                    <select id="rate_per_km" name="rate_per_km" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="" disabled selected>Select Rate</option>
+                                    </select>
+                                </div>
+                                <p class="error-message hidden"></p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="pt-6 border-t border-slate-200 flex justify-end">
+                        <button type="submit" id="submitButton" class="flex items-center justify-center bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300 disabled:bg-blue-400 shadow-sm hover:shadow-md">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            <span id="buttonText">Add Vehicle</span>
+                            <div id="buttonSpinner" class="spinner hidden ml-2"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+</div>
+
+<script>
+    // --- Mobile Sidebar Logic ---
+    const sidebar = document.getElementById('sidebar');
+    const menuButton = document.getElementById('menu-button');
+    const overlay = document.getElementById('sidebar-overlay');
+    function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+    menuButton.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    // --- Form Submission & Validation Logic ---
+    const addVehicleForm = document.getElementById('addVehicleForm');
+    const submitButton = document.getElementById('submitButton');
+    const buttonText = document.getElementById('buttonText');
+    const buttonSpinner = document.getElementById('buttonSpinner');
+    const messageArea = document.getElementById('messageArea');
+
+    // --- Conditional Rate per Km Logic ---
+    const vehicleTypeSelect = document.getElementById('vehicle_type');
+    const ratePerKmSelect = document.getElementById('rate_per_km');
+
+    const rates = {
+        'Premium': [15, 18, 20, 25],
+        'Normal': [5, 8, 10, 12, 15],
+        'Sedan': [10, 12, 15, 18],
+        'SUV': [18, 20, 22, 25, 28]
+    };
+
+    vehicleTypeSelect.addEventListener('change', () => {
+        const selectedType = vehicleTypeSelect.value;
+        ratePerKmSelect.innerHTML = '<option value="" disabled selected>Select Rate</option>'; // Reset options
+
+        if (selectedType in rates) {
+            rates[selectedType].forEach(rate => {
+                const option = document.createElement('option');
+                option.value = rate;
+                option.textContent = `₹${rate}`;
+                ratePerKmSelect.appendChild(option);
+            });
+        }
+    });
+
+    // --- Live Validation ---
+    const inputs = addVehicleForm.querySelectorAll('input[required], select[required]');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => validateInput(input));
+        input.addEventListener('blur', () => validateInput(input));
+    });
+
+    function validateInput(input) {
+        const errorMessageElement = input.parentElement.parentElement.querySelector('.error-message');
+        if (!input.checkValidity()) {
+            input.classList.add('input-error');
+            errorMessageElement.textContent = input.validationMessage;
+            errorMessageElement.classList.remove('hidden');
+            return false;
+        } else {
+            input.classList.remove('input-error');
+            errorMessageElement.classList.add('hidden');
+            return true;
+        }
+    }
+    
+    function validateAllFields() {
+        let isFormValid = true;
+        inputs.forEach(input => {
+            if (!validateInput(input)) {
+                isFormValid = false;
+            }
+        });
+        return isFormValid;
+    }
+
+    addVehicleForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageArea.innerHTML = '';
+        
+        if (!validateAllFields()) {
+            displayMessage('Please fix the errors in the form.', 'error');
+            return;
+        }
+        
+        setLoading(true);
+
+        // --- START: CORRECTED API CALL LOGIC ---
+        const formData = new FormData(addVehicleForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/addvehicle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) { // Check if HTTP status is 2xx
+                displayMessage(result.message, 'success');
+                addVehicleForm.reset();
+                ratePerKmSelect.innerHTML = '<option value="" disabled selected>Select Rate</option>'; // Reset Rate options
+                inputs.forEach(input => {
+                    input.classList.remove('input-error');
+                    const errorMsg = input.parentElement.parentElement.querySelector('.error-message');
+                    if (errorMsg) errorMsg.classList.add('hidden');
+                });
+                window.scrollTo(0, 0);
+            } else { // Handle errors from the server (like 409, 500)
+                displayMessage(result.message, 'error');
+                window.scrollTo(0, 0);
+            }
+        } catch (error) {
+            console.error('Submission Error:', error);
+            displayMessage('A network error occurred. Please try again.', 'error');
+            window.scrollTo(0, 0);
+        } finally {
+            setLoading(false); // Always re-enable the button
+        }
+        // --- END: CORRECTED API CALL LOGIC ---
+    });
+
+    function setLoading(isLoading) {
+        submitButton.disabled = isLoading;
+        buttonText.textContent = isLoading ? 'Saving...' : 'Add Vehicle';
+        buttonSpinner.classList.toggle('hidden', !isLoading);
+    }
+
+    function displayMessage(message, type) {
+        const successIcon = `<svg class="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`;
+        const errorIcon = `<svg class="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>`;
+        const bgColor = type === 'success' ? 'bg-green-100' : 'bg-red-100';
+        const textColor = type === 'success' ? 'text-green-800' : 'text-red-800';
+        const icon = type === 'success' ? successIcon : errorIcon;
+        
+        messageArea.innerHTML = `
+            <div class="flex items-center p-4 rounded-lg text-sm ${bgColor} ${textColor}">
+                ${icon}
+                <span>${message}</span>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>

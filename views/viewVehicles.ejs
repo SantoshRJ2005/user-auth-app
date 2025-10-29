@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Vehicles | SharingYatra</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #ff6b4a;
+      --secondary-color: #2c3e50;
+      --light-gray: #f4f4f4;
+      --dark-gray: #555;
+      --white: #ffffff;
+      --danger: #dc3545;
+      --warning: #ffc107;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display: flex; background: var(--light-gray); }
+
+    /* Sidebar */
+    .sidebar { width: 250px; height: 100vh; background: var(--secondary-color); padding: 30px 20px; color: var(--white); position: fixed; top: 0; left: 0; }
+    .sidebar h2 { color: var(--primary-color); font-size: 24px; margin-bottom: 30px; }
+    .sidebar a { display: block; color: var(--white); text-decoration: none; padding: 10px; margin-bottom: 10px; border-left: 3px solid transparent; transition: all 0.3s ease; }
+    .sidebar a:hover, .sidebar a.active { color: var(--primary-color); border-left: 3px solid var(--primary-color); background: rgba(255,255,255,0.1); }
+    
+    /* Main */
+    .main { flex: 1; padding: 30px; margin-left: 250px; }
+    h1 { margin-bottom: 20px; color: var(--secondary-color); }
+
+    /* Table */
+    .table-container { background: var(--white); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 15px; text-align: left; }
+    th { background-color: var(--secondary-color); color: var(--white); font-weight: 600; }
+    tr:nth-child(even) { background-color: var(--light-gray); }
+    td.actions-cell { display: flex; gap: 10px; align-items: center; }
+
+    /* Buttons */
+    .action-btn { padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: var(--white); transition: opacity 0.3s; }
+    .action-btn:hover { opacity: 0.8; }
+    .edit-btn { background-color: var(--warning); }
+    .delete-btn { background-color: var(--danger); }
+
+    /* Alerts */
+    .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 16px; }
+    .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: none; align-items: center; justify-content: center; }
+    .modal-content { background: var(--white); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-content h2 { color: var(--secondary-color); margin-bottom: 20px; }
+    .modal-content .form-group { margin-bottom: 15px; }
+    .modal-content label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--dark-gray); }
+    .modal-content input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .modal-actions { margin-top: 20px; text-align: right; }
+    .modal-actions button { padding: 10px 20px; margin-left: 10px; }
+    .btn-cancel { background: #6c757d; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>SharingYatra</h2>
+  <a href="/manageBooking">Manage Bookings</a>
+  <a href="/addDriver">Add Drivers</a>
+  <a href="/viewDriver">View Drivers</a>
+  <a href="/vehicles" class="active">Vehicles</a>
+  <a href="/dashboard">Profile</a>
+  <a href="/logout">Logout</a>
+</div>
+
+<div class="main">
+  <h1>View All Vehicles</h1>
+
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <% if (vehicles.length === 0 && !error) { %>
+    <div class="alert alert-info">No vehicles found. Please add a vehicle to your agency.</div>
+  <% } else { %>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle Name</th>
+            <th>Model</th>
+            <th>Number Plate</th>
+            <th>RC No</th>
+            <th>Insurance No</th>
+            <th>AC Type</th>
+            <th>Type</th>
+            <th>Capacity</th>
+            <th>Rate/km</th>
+            <th>Owner</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% vehicles.forEach(vehicle => { %>
+            <tr>
+              <td><%= vehicle.vehicle_name %></td>
+              <td><%= vehicle.model %></td>
+              <td><%= vehicle.number_plate %></td>
+              <td><%= vehicle.rc_number %></td>
+              <td><%= vehicle.insurance_number %></td>
+              <td><%= vehicle.ac_type %></td>
+              <td><%= vehicle.vehicle_type %></td>
+              <td><%= vehicle.max_capacity %></td>
+              <td><%= vehicle.rate_per_km %></td>
+              <td><%= vehicle.owner_name %></td>
+              <td class="actions-cell">
+                <button 
+                  class="action-btn edit-btn" 
+                  title="Edit"
+                  data-id="<%= vehicle._id %>"
+                  data-name="<%= vehicle.vehicle_name %>"
+                  data-model="<%= vehicle.model %>"
+                  data-plate="<%= vehicle.number_plate %>"
+                  data-rc="<%= vehicle.rc_number %>"
+                  data-insurance="<%= vehicle.insurance_number %>"
+                  data-owner="<%= vehicle.owner_name %>"
+                  data-ac="<%= vehicle.ac_type %>"
+                  data-type="<%= vehicle.vehicle_type %>"
+                  data-capacity="<%= vehicle.max_capacity %>"
+                  data-rate="<%= vehicle.rate_per_km %>"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button 
+                  class="action-btn delete-btn" 
+                  title="Delete" 
+                  data-id="<%= vehicle._id %>"
+                >
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Edit Vehicle</h2>
+    <form id="editForm" action="/editVehicle" method="POST">
+      <input type="hidden" id="editVehicleId" name="vehicleId">
+      <div class="form-group">
+        <label for="editName">Vehicle Name</label>
+        <input type="text" id="editName" name="vehicle_name" required>
+      </div>
+      <div class="form-group">
+        <label for="editModel">Model</label>
+        <input type="text" id="editModel" name="model" required>
+      </div>
+      <div class="form-group">
+        <label for="editPlate">Number Plate</label>
+        <input type="text" id="editPlate" name="number_plate" required>
+      </div>
+      <div class="form-group">
+        <label for="editRC">RC Number</label>
+        <input type="text" id="editRC" name="rc_number" required>
+      </div>
+      <div class="form-group">
+        <label for="editInsurance">Insurance Number</label>
+        <input type="text" id="editInsurance" name="insurance_number" required>
+      </div>
+      <div class="form-group">
+        <label for="editOwner">Owner Name</label>
+        <input type="text" id="editOwner" name="owner_name" required>
+      </div>
+      <div class="form-group">
+        <label for="editAC">AC Type</label>
+        <input type="text" id="editAC" name="ac_type" required>
+      </div>
+      <div class="form-group">
+        <label for="editType">Vehicle Type</label>
+        <input type="text" id="editType" name="vehicle_type" required>
+      </div>
+      <div class="form-group">
+        <label for="editCapacity">Capacity</label>
+        <input type="number" id="editCapacity" name="max_capacity" required>
+      </div>
+      <div class="form-group">
+        <label for="editRate">Rate per KM</label>
+        <input type="number" id="editRate" name="rate_per_km" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="action-btn btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+        <button type="submit" class="action-btn edit-btn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Confirm Deletion</h2>
+    <p>Are you sure you want to permanently delete this vehicle? This action cannot be undone.</p>
+    <form id="deleteForm" action="/deleteVehicle" method="POST">
+      <input type="hidden" id="deleteVehicleId" name="vehicleId">
+      <div class="modal-actions">
+        <button type="button" class="action-btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+        <button type="submit" class="action-btn delete-btn">Delete</button>
+      </div>
+    </form>
+  </div>
+</div> 
+
+<script>
+function openModal(modalId) {
+  document.getElementById(modalId).style.display = 'flex';
+}
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Edit
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('editVehicleId').value = btn.dataset.id;
+      document.getElementById('editName').value = btn.dataset.name;
+      document.getElementById('editModel').value = btn.dataset.model;
+      document.getElementById('editPlate').value = btn.dataset.plate;
+      document.getElementById('editRC').value = btn.dataset.rc;
+      document.getElementById('editInsurance').value = btn.dataset.insurance;
+      document.getElementById('editOwner').value = btn.dataset.owner;
+      document.getElementById('editAC').value = btn.dataset.ac;
+      document.getElementById('editType').value = btn.dataset.type;
+      document.getElementById('editCapacity').value = btn.dataset.capacity;
+      document.getElementById('editRate').value = btn.dataset.rate;
+      openModal('editModal');
+    });
+  });
+
+  // Delete
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('deleteVehicleId').value = btn.dataset.id;
+      openModal('deleteModal');
+    });
+  });
+
+  // Close on overlay click
+  window.onclick = function(event) {
+    if (event.target.classList.contains('modal-overlay')) {
+      closeModal('editModal');
+      closeModal('deleteModal');
+    }
+  }
+});
+</script>
+
+</body>
+</html>
