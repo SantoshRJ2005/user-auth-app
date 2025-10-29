@@ -549,7 +549,7 @@ router.post('/approvebooking', isAuthenticated, async (req, res) => {
             // Saving the fare passed in the request body during approval
             fare: fare 
         });
-
+        await Vehicle.findByIdAndUpdate()
         // 4. SEND EMAIL: Use the data from the fetched 'booking' object
         await transporter.sendMail({
             from: process.env.USER || 'sharingyatra@gmail.com',
