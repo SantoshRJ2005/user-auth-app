@@ -422,8 +422,9 @@
                 <div class="actions-buttons">
                     <input type="hidden" name="requestId" value="<%= booking._id %>">
                     <input type="hidden" name="driverID" value="<%= booking.driverID %>">
+                    
                     <button type="submit" class="btn btn-primary btn-assign" <%= drivers.length === 0 ? 'disabled' : '' %>>
-                        <%= drivers.length === 0 ? 'No Driver Available' : 'Set Fare & Approve' %>
+                        <%= drivers.length === 0 ? 'No Driver Available' : 'Approve & Sent Email' %>
                     </button>
                     
                     <button type="button" class="btn btn-outline-danger" onclick="document.getElementById('reject-<%= booking._id %>').submit()">Reject</button>
