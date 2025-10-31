@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earnings | SharingYatra</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+    /* --- Root Variables --- */
+    :root {
+        --primary-color: #ff6b4a;
+        --secondary-color: #2c3e50;
+        --bg-light: #f7f8fc;
+        --text-dark: #333;
+        --text-light: #667;
+        --white: #ffffff;
+        --border-color: #dfe6f0;
+        --success: #28a745;
+        --danger: #dc3545;
+        --info: #007bff;
+        --warning: #ffc107; 
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+            
+    body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        background: var(--bg-light);
+    }
+
+    /* --- Sidebar (From ManageBookings) --- */
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        background: var(--secondary-color);
+        padding: 30px 20px;
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000; /* Ensure sidebar is on top */
+    }
+    .sidebar h2 { /* Changed from .logo */
+        color: var(--primary-color); 
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 35px;
+        padding-left: 5px;
+    }
+    
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--white);
+        font-size: 1.6rem;
+        cursor: pointer;
+    }
+
+    .sidebar-links {
+        display: flex;
+        flex-direction: column;
+        flex: 1; /* This makes it fill the space */
+    }
+    
+    .sidebar-links nav {
+        flex: 1; /* Pushes logout link to the bottom */
+    }
+
+    .sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        text-decoration: none;
+        padding: 12px 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .sidebar a i { 
+        width: 20px; 
+        text-align: center;
+        font-size: 0.95rem; 
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+        /* This style matches your image */
+        color: var(--white);
+        background: var(--primary-color);
+    }
+
+    .sidebar a.logout { 
+        margin-top: 20px; 
+    }
+
+    /* --- Main Content --- */
+    .main {
+        flex: 1;
+        padding: 30px;
+        margin-left: 250px;
+    }
+    .main h1 {
+        margin-bottom: 25px;
+        color: var(--secondary-color);
+        font-size: 2.2rem; 
+        font-weight: 700;
+    }
+    .main h2 {
+        color: var(--secondary-color);
+        font-size: 1.5rem;
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+            
+    /* --- Table Container --- */
+    .table-container { 
+        background: var(--white); 
+        border-radius: 12px; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+        overflow: hidden; 
+        border: 1px solid var(--border-color);
+    }
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+    }
+    th { 
+        background-color: #fafbfc; 
+        color: var(--text-light); 
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 20px 24px; 
+        text-align: left;
+    }
+    td {
+        padding: 20px 24px;
+        font-weight: 500;
+        color: var(--text-dark); 
+        font-size: 0.9rem;
+        text-align: left;
+    }
+    tbody tr {
+        border-bottom: 1px solid var(--border-color); 
+        transition: background-color 0.2s ease;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background-color: #fcfcfc; }
+            
+    .no-data {
+        text-align: center;
+        color: var(--text-light);
+        padding: 40px;
+        font-style: italic;
+    }
+
+    /* --- Alerts --- */
+    .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+    .alert-error { 
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* --- Filter Form --- */
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap; /* Allows wrapping on small screens */
+        gap: 15px;
+        padding: 20px;
+        background: var(--white);
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border: 1px solid var(--border-color);
+        align-items: flex-end; /* Aligns button with inputs */
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1; /* Allows groups to grow */
+    }
+    .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-light);
+    }
+    .form-group input[type="date"] {
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        min-width: 180px; /* Ensures inputs don't get too small */
+    }
+    .btn-filter {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: var(--primary-color);
+        color: var(--white);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 42px; /* Matches input height */
+    }
+    .btn-filter:hover {
+        background: #e05a3c;
+    }
+            
+    /* --- Stats Card --- */
+    .stats-container {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+    .stat-card {
+        background: var(--white);
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .stat-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stat-value {
+        font-size: 2.8rem;
+        font-weight: 700; /* Fixed: 'warning' changed to 'font-weight' */
+        color: var(--success);
+        margin: 10px 0;
+    }
+    .stat-period {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    /* --- Responsive Design (Updated) --- */
+    @media (max-width: 768px) {
+        /* Stacks top-bar and main content vertically */
+        body {
+            flex-direction: column;
+        }
+
+        /* Converts sidebar to a horizontal top-bar */
+        .sidebar {
+            width: 100%;
+            height: 60px; /* Fixed height for top bar */
+            position: sticky; /* Sticks to the top */
+            top: 0;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between; /* Logo left, toggle right */
+            padding: 0 20px; /* Adjusted padding */
+        }
+
+        .sidebar h2 {
+            margin-bottom: 0;
+            font-size: 20px;
+        }
+
+        /* Show the toggle button */
+        .menu-toggle {
+            display: block;
+        }
+
+        /* This is the new link container */
+        .sidebar-links {
+            position: fixed;
+            top: 60px; /* Position below the top bar */
+            left: 0;
+            width: 250px; /* Same width as desktop sidebar */
+            height: calc(100vh - 60px); /* Full height minus top bar */
+            background: var(--secondary-color);
+            padding: 20px;
+            
+            /* Hide off-screen by default */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            
+            /* Ensure links stack vertically */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* This class is added by JS to show the menu */
+        .sidebar-links.open {
+            transform: translateX(0);
+        }
+
+        /* Reset nav and logout styles for vertical menu */
+        .sidebar-links nav {
+            flex: 1;
+        }
+        .sidebar a {
+            margin-bottom: 8px;
+        }
+        .sidebar a.logout {
+            margin-top: 20px;
+            margin-left: 0; /* Remove auto margin */
+        }
+
+        /* Removes the 250px margin so content takes full width */
+        .main {
+            margin-left: 0;
+            padding: 20px;
+        }
+        
+        .main h1 { font-size: 1.6rem; }
+        .main h2 { font-size: 1.3rem; }
+        .stat-value { font-size: 2.2rem; }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            min-width: 600px; /* Force table to be wide */
+        }
+        .filter-form { flex-direction: column; align-items: stretch; }
+        .form-group { flex: 1 1 auto; }
+        .btn-filter { justify-content: center; }
+    }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>SharingYatra</h2> <button id="menu-toggle" class="menu-toggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar-links">
+        <nav>
+            <a href="/manageBooking"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>
+            <a href="/approvedRides"><i class="fa-solid fa-check-double"></i> Approved</a>
+            <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
+            <a href="/viewDriver"><i class="fa-solid fa-users"></i> View Drivers</a>
+            <a href="/addVehicles"><i class="fa-solid fa-car"></i> Add Vehicles</a>
+            <a href="/viewVehicles"><i class="fa-solid fa-car-side"></i> View Vehicles</a>
+            <a href="/earning" class="active"><i class="fa-solid fa-chart-line"></i> Earnings</a>
+            <a href="/dashboard"><i class="fa-solid fa-user-circle"></i> Profile</a>
+        </nav>
+        <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</div>
+<div class="main">
+    <h1>Agency Earnings</h1>
+    
+    <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form class="filter-form" action="/earning" method="POST">
+        <div class="form-group">
+            <label for="startDate">From Date</label>
+            <input type="date" id="startDate" name="startDate" value="<%= startDate %>" required>
+        </div>
+        <div class="form-group">
+            <label for="endDate">To Date</label>
+            <input type="date" id="endDate" name="endDate" value="<%= endDate %>" required>
+        </div>
+        <button type="submit" class="btn-filter">
+            <i class="fa-solid fa-filter"></i> Filter Range
+        </button>
+    </form>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <span class="stat-label">Total Completed Earnings</span>
+            <span class="stat-value">₹<%= totalEarnings.toFixed(2) %></span>
+            <span class="stat-period">Displaying for: <%= startDate %> to <%= endDate %></span>
+        </div>
+    </div>
+
+    <h2>Driver Leaderboard</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Driver Name</th>
+                    <th>Total Earnings (₹)</th>
+                    <th>Contribution (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (driverEarnings && driverEarnings.length > 0) { %>
+                    <% driverEarnings.forEach(driver => { %>
+                        <tr>
+                            <td><%= driver.name %></td>
+                            <td><%= driver.total.toFixed(2) %></td>
+                            <td><%= driver.contribution %>%</td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="3" class="no-data">
+                            No completed rides found for this period.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Sidebar Toggle Functionality ---
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar-links').classList.toggle('open');
+        });
+    });
+</script>
+
+</body>
+</html>
