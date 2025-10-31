@@ -133,6 +133,26 @@
         .form-group input:focus ~ i, .form-group select:focus ~ i {
             color: var(--primary-color);
         }
+        /* Fix padding for select with icon */
+        .form-group select {
+            padding-left: 45px;
+            appearance: none; /* Remove default arrow */
+        }
+        .input-wrapper::after { /* Custom arrow */
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            pointer-events: none;
+        }
+        .form-group select:focus ~ .input-wrapper::after {
+             color: var(--primary-color);
+        }
+        /* --- End Select Fix --- */
 
         /* File Upload (UPDATED) */
         .file-upload-wrapper {
@@ -248,7 +268,7 @@
         </div>
 
         <div class="form-side">
-            <h2>Create Your Partner Account</h2>
+            <h2>Create Your Agency Account</h2>
             <p class="subtitle">Fill in your agency details to get started.</p>
 
             <div id="messageArea"></div>
@@ -269,14 +289,21 @@
                             <i class="fa-solid fa-user-tie"></i>
                         </div>
                     </div>
+                    
                     <div class="form-group">
                         <label for="oprate-station">Operating Station</label>
                         <div class="input-wrapper">
                             <select id="oprate-station" name="oprateStation" required>
-                                <option value="" disabled selected>Select primary city</option>
-                                <option value="diva">Diva</option>
-                                <option value="thane">Thane</option>
-                                <option value="mumbai">Mumbai</option>
+                                <option value="" disabled selected>Select primary station</option>
+                                <% if (typeof stations !== 'undefined' && stations.length > 0) { %>
+                                    <% stations.forEach(station => { %>
+                                        <option value="<%= station %>"><%= station %></option>
+                                    <% }) %>
+                                <% } else { %>
+                                    <option value="Mumbai">Mumbai</option>
+                                    <option value="Thane">Thane</option>
+                                    <option value="Diva">Diva</option>
+                                <% } %>
                             </select>
                             <i class="fa-solid fa-map-marker-alt"></i>
                         </div>
