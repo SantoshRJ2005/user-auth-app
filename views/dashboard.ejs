@@ -5,132 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agency Dashboard | SharingYatra</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #ff6b4a;
-            --secondary-color: #2c3e50;
-            --light-gray: #f4f7f6;
-            --dark-gray: #555;
-            --white: #ffffff;
-            --border-color: #e0e0e0;
+   <style>
+    :root {
+        --primary-color: #ff6b4a;
+        --secondary-color: #2c3e50;
+        --light-gray: #f4f7f6;
+        --dark-gray: #555;
+        --white: #ffffff;
+        --border-color: #e0e0e0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display: flex; background: var(--light-gray); }
+
+    /* --- Sidebar (Desktop) --- */
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        background: var(--secondary-color);
+        padding: 30px 20px;
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000; /* Ensure sidebar is on top */
+    }
+    .sidebar h2 { color: var(--primary-color); font-size: 24px; margin-bottom: 30px; }
+    
+    /* New: Toggle button (hidden on desktop) */
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--white);
+        font-size: 1.6rem;
+        cursor: pointer;
+    }
+
+    /* New: Wrapper for links */
+    .sidebar-links {
+        display: flex;
+        flex-direction: column;
+        flex: 1; /* This makes it fill the space */
+    }
+    
+    /* Navigation links container */
+    .sidebar-links nav {
+        flex: 1; /* Pushes logout link to the bottom */
+    }
+
+    .sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+        text-decoration: none;
+        padding: 12px 10px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+    .sidebar a:hover, .sidebar a.active {
+        color: var(--white);
+        background: var(--primary-color);
+    }
+
+    /* Logout link */
+    .sidebar a.logout {
+        margin-top: 20px;
+    }
+
+    /* --- Main Content (Desktop) --- */
+    .main { flex: 1; padding: 30px; margin-left: 250px; }
+    h1 { margin-bottom: 25px; color: var(--secondary-color); font-size: 2rem; }
+
+    /* --- Profile Card Styles --- */
+    .profile-card {
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        max-width: 900px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 25px 30px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .header-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        background-color: #fff0ec;
+        padding: 15px;
+        border-radius: 50%;
+    }
+    .header-text h2 {
+        color: var(--secondary-color);
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    .header-text p {
+        color: var(--dark-gray);
+        margin: 0;
+    }
+
+    .profile-body {
+        padding: 30px;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .detail-item .icon {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        margin-top: 3px;
+        width: 20px;
+        text-align: center;
+    }
+    .detail-item .text .label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+    .detail-item .text .value {
+        color: var(--dark-gray);
+    }
+    .document-link {
+        color: var(--primary-color); 
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .document-link:hover { text-decoration: underline; }
+    
+    /* =========================================
+        ✅ RESPONSIVE CODE 
+    =========================================
+    */
+
+    /* --- Tablet / Large Mobile --- */
+    @media (max-width: 900px) {
+        .details-grid { grid-template-columns: 1fr; }
+    }
+
+    /* --- Small Mobile --- */
+    @media (max-width: 768px) {
+        /* Stacks top-bar and main content vertically */
+        body {
+            flex-direction: column;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; background: var(--light-gray); }
-
+        /* Converts sidebar to a horizontal top-bar */
         .sidebar {
-            width: 250px;
-            height: 100vh;
-            background: var(--secondary-color);
-            padding: 30px 20px;
-            color: white;
-            position: fixed;
-        }
-        .sidebar h2 { color: var(--primary-color); font-size: 24px; margin-bottom: 30px; }
-        .sidebar a {
-            display: flex;
+            width: 100%;
+            height: 60px; /* Fixed height for top bar */
+            position: sticky; /* Sticks to the top */
+            top: 0;
+            flex-direction: row;
             align-items: center;
-            gap: 10px;
-            color: white;
-            text-decoration: none;
-            padding: 12px 10px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        .sidebar a:hover, .sidebar a.active {
-            color: var(--white);
-            background: var(--primary-color);
+            justify-content: space-between; /* Logo left, toggle right */
+            padding: 0 20px; /* Adjusted padding */
         }
 
-        .main { flex: 1; padding: 30px; margin-left: 250px; }
-        h1 { margin-bottom: 25px; color: var(--secondary-color); font-size: 2rem; }
+        .sidebar h2 {
+            margin-bottom: 0;
+            font-size: 20px;
+        }
 
-        .profile-card {
-            background: var(--white);
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            max-width: 900px;
-        }
-        
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 25px 30px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .header-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            background-color: #fff0ec;
-            padding: 15px;
-            border-radius: 50%;
-        }
-        .header-text h2 {
-            color: var(--secondary-color);
-            font-size: 1.5rem;
-            margin: 0;
-        }
-        .header-text p {
-            color: var(--dark-gray);
-            margin: 0;
-        }
-        
-        .profile-body {
-            padding: 30px;
-        }
-        
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-        
-        .detail-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-        }
-        .detail-item .icon {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            margin-top: 3px;
-            width: 20px;
-            text-align: center;
-        }
-        .detail-item .text .label {
+        /* Show the toggle button */
+        .menu-toggle {
             display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
         }
-        .detail-item .text .value {
-            color: var(--dark-gray);
+
+        /* This is the new link container */
+        .sidebar-links {
+            position: fixed;
+            top: 60px; /* Position below the top bar */
+            left: 0;
+            width: 250px; /* Same width as desktop sidebar */
+            height: calc(100vh - 60px); /* Full height minus top bar */
+            background: var(--secondary-color);
+            padding: 20px;
+            
+            /* Hide off-screen by default */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            
+            /* Ensure links stack vertically */
+            display: flex;
+            flex-direction: column;
         }
-        .document-link {
-            /* Updated style to match brand */
-            color: var(--primary-color); 
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .document-link:hover { text-decoration: underline; }
         
-        @media (max-width: 900px) {
-            .details-grid { grid-template-columns: 1fr; }
+        /* This class is added by JS to show the menu */
+        .sidebar-links.open {
+            transform: translateX(0);
         }
-    </style>
-</head>
-<body>
+
+        /* Reset nav and logout styles for vertical menu */
+        .sidebar-links nav {
+            flex: 1;
+        }
+        .sidebar a {
+            margin-bottom: 8px;
+        }
+        .sidebar a.logout {
+            margin-top: 20px;
+            margin-left: 0; /* Remove auto margin */
+        }
+
+        /* Removes the 250px margin so content takes full width */
+        .main {
+            margin-left: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+</head><body>
 
 <div class="sidebar">
     <h2>SharingYatra</h2>
-    <a href="/manageBooking"><i class="fa-solid fa-tasks"></i> Manage Bookings</a>
-    <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
-    <a href="/viewVehicles"><i class="fa-solid fa-car"></i> Vehicles</a>
-    <a href="#"><i class="fa-solid fa-chart-line"></i> Earnings</a>
-    <a href="/dashboard" class="active"><i class="fa-solid fa-id-card"></i> Profile</a>
-    <a href="/logout"><i class="fa-solid fa-sign-out-alt"></i> Logout</a>
+
+    <button id="menu-toggle" class="menu-toggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar-links">
+        <nav>
+           <a href="/manageBooking"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>
+     <a href="/approvedRides"><i class="fa-solid fa-check-double"></i> Approved</a>
+     <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
+     <a href="/viewDriver"><i class="fa-solid fa-users"></i> View Drivers</a>
+     <a href="/addVehicles"><i class="fa-solid fa-car"></i> Add Vehicles</a>
+      <a href="/viewVehicles"><i class="fa-solid fa-car-side"></i> View Vehicles</a>
+      <a href="/earning" ><i class="fa-solid fa-chart-line"></i> Earnings</a>
+     <a href="/dashboard" class="active"><i class="fa-solid fa-user-circle"></i> Profile</a>
+        </nav>
+        <a href="/logout" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Logout</a>
+    </div>
 </div>
 
 <div class="main">
@@ -196,7 +324,7 @@
                         <span class="value"><%= agency.panNumber %></span>
                     </div>
                 </div>
-                    
+                        
                 <div class="detail-item">
                     <i class="fa-solid fa-file-alt icon"></i>
                     <div class="text">
@@ -222,6 +350,12 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+        document.querySelector('.sidebar-links').classList.toggle('open');
+    });
+</script>
 
 </body>
 </html>
