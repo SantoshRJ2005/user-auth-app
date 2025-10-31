@@ -1,539 +1,608 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Bookings | SharingYatra</title>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings | SharingYatra</title>
     
-    :root {
-      --primary-color: #ff6b4a;
-      --secondary-color: #2c3e50;
-      --bg-light: #f7f8fc;
-      --text-dark: #333;
-      --text-light: #667;
-      --white: #ffffff;
-      --border-color: #dfe6f0;
-      --success: #28a745;
-      --danger: #dc3545;
-      --info: #007bff;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    body {
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      background: var(--bg-light);
-    }
-
-    /* --- Sidebar --- */
-    .sidebar {
-      width: 250px;
-      height: 100vh;
-      background: var(--secondary-color);
-      padding: 30px 20px;
-      color: white;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar .logo {
-      color: var(--primary-color);
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 35px;
-      padding-left: 5px;
-    }
-    .sidebar nav { flex: 1; }
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: white;
-      text-decoration: none;
-      padding: 12px 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border-left: 3px solid transparent;
-      transition: all 0.3s ease;
-    }
-    .sidebar a i { width: 20px; text-align: center; }
-    .sidebar a:hover,
-    .sidebar a.active {
-      color: var(--primary-color);
-      border-left: 3px solid var(--primary-color);
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .sidebar .logout { margin-top: auto; }
-
-    /* --- Main Content --- */
-    .main {
-      flex: 1;
-      padding: 30px;
-      margin-left: 250px;
-    }
-    .main h1 {
-      margin-bottom: 25px;
-      color: var(--secondary-color);
-      font-size: 2.5rem;
-    }
-
-    /* --- Alerts & Messages --- */
-    .alert {
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 0.95rem;
-    }
-    .alert-danger {
-      color: #721c24;
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-    }
-    .alert-info {
-      color: #004085;
-      background-color: #cce5ff;
-      border: 1px solid #b8daff;
-    }
-    .alert-info a { color: #004085; font-weight: 600; }
-    .no-requests {
-      color: var(--text-light);
-      font-size: 1.1rem;
-      text-align: center;
-      padding: 40px;
-    }
-
-    /* --- Request Card --- */
-    .request {
-      background: var(--white);
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-    }
-    .request-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      border-bottom: 1px solid var(--border-color);
-      background: #fafbfc;
-    }
-    .request-header h3 {
-      color: var(--secondary-color);
-      font-size: 1.3rem;
-    }
-    .request-header .date {
-      font-size: 0.9rem;
-      color: var(--text-light);
-    }
-    .request-body {
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .detail-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .detail-item i {
-      font-size: 1rem;
-      color: var(--primary-color);
-      margin-top: 5px;
-      width: 20px;
-      text-align: center;
-    }
-    .detail-item div {
-      display: flex;
-      flex-direction: column;
-    }
-    .detail-item .label {
-      font-size: 0.85rem;
-      color: var(--text-light);
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-    .detail-item .value {
-      font-size: 1rem;
-      color: var(--text-dark);
-      font-weight: 500;
-    }
-    .route { grid-column: 1 / -1; } /* Make Route full-width */
-
-    /* --- Actions & Buttons --- */
-    .actions {
-      padding: 20px;
-      border-top: 1px solid var(--border-color);
-      background: #fafbfc;
-    }
-    .actions-buttons {
-      display: flex;
-      gap: 10px;
-    }
-    .btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-    }
-    .btn-primary {
-      background-color: var(--success);
-      color: white;
-    }
-    .btn-primary:hover { background-color: #218838; }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    .btn-outline-danger {
-      background-color: transparent;
-      color: var(--danger);
-      border: 2px solid var(--danger);
-    }
-    .btn-outline-danger:hover {
-      background-color: var(--danger);
-      color: white;
-    }
-    .btn-secondary {
-      background-color: var(--text-light);
-      color: white;
-    }
-    .btn-secondary:hover { background-color: #5a6268; }
+    <style>
+        :root {
+            /* Variables from Dashboard */
+            --primary-color: #ff6b4a;
+            --secondary-color: #2c3e50;
+            --dark-gray: #555;
+            
+            /* Variables from ManageBookings */
+            --bg-light: #f7f8fc;
+            --text-dark: #333;
+            --text-light: #667;
+            --white: #ffffff;
+            --border-color: #dfe6f0;
+            --success: #28a745;
+            --danger: #dc3545;
+            --info: #007bff;
+        }
 
-    /* --- Assign Box (Static for fare input) --- */
-    .assign-box {
-      margin-top: 0;
-      padding-top: 0;
-      border-top: none;
-    }
-    .assign-form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-    .assign-box select, .assign-box input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 1rem;
-      font-family: 'Poppins', sans-serif;
-    }
-    .assign-box select:focus, .assign-box input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.2);
-    }
-    .assign-actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-assign {
-      background-color: var(--info);
-      color: white;
-    }
-    .btn-assign:hover { background-color: #0069d9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* --- Responsive Design --- */
-    @media (max-width: 992px) {
-      body { flex-direction: column; }
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-        flex-direction: row;
-        align-items: center;
-        overflow-x: auto;
-      }
-      .sidebar .logo { margin-bottom: 0; margin-right: 20px; }
-      .sidebar nav { display: flex; flex: 1; }
-      .sidebar a { margin-bottom: 0; }
-      .sidebar .logout { margin-top: 0; margin-left: auto; }
-      .main { margin-left: 0; }
-    }
-    @media (max-width: 768px) {
-      .main h1 { font-size: 2rem; }
-      .request-body { grid-template-columns: 1fr; }
-      .assign-form-grid { grid-template-columns: 1fr; }
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            background: var(--bg-light);
+        }
 
-  </style>
+        /* --- Sidebar (From Dashboard) --- */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: var(--secondary-color);
+            padding: 30px 20px;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000; /* Ensure sidebar is on top */
+        }
+        .sidebar h2 { 
+            color: var(--primary-color); 
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 35px;
+            padding-left: 5px;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.6rem;
+            cursor: pointer;
+        }
+
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            flex: 1; /* This makes it fill the space */
+        }
+        
+        .sidebar-links nav {
+            flex: 1; /* Pushes logout link to the bottom */
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar a i { width: 20px; text-align: center; }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            color: var(--white);
+            background: var(--primary-color);
+        }
+
+        .sidebar a.logout {
+            margin-top: 20px;
+        }
+
+        /* --- Main Content (From Dashboard) --- */
+        .main { flex: 1; padding: 30px; margin-left: 250px; }
+        
+        /* New: Wrapper for H1 and Counter */
+        .header-with-counter {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* H1 style from ManageBookings */
+        .main h1 {
+            margin-bottom: 0; /* Removed margin from h1 */
+            color: var(--secondary-color);
+            font-size: 2.5rem;
+        }
+
+        /* New: Counter Badge Style */
+        .booking-counter {
+            background-color: var(--primary-color);
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            min-width: 30px;
+            text-align: center;
+            line-height: 1;
+            align-self: center; /* Align with h1 text */
+            margin-top: 5px; /* Small adjustment */
+        }
+
+        /* --- Alerts & Messages (From ManageBookings) --- */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            color: #004085;
+            background-color: #cce5ff;
+            border: 1px solid #b8daff;
+        }
+        .alert-info a { color: #004085; font-weight: 600; }
+        .no-requests {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* --- Request Card (From ManageBookings) --- */
+        .request {
+            background: var(--white);
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: #fafbfc;
+        }
+        .request-header h3 {
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+        }
+        .request-header .date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .request-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .detail-item i {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin-top: 5px;
+            width: 20px;
+            text-align: center;
+        }
+        .detail-item div {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-item .label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .detail-item .value {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        .route { grid-column: 1 / -1; } /* Make Route full-width */
+
+        /* --- Actions & Buttons (From ManageBookings) --- */
+        .actions {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: #fafbfc;
+        }
+        .actions-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: var(--success);
+            color: white;
+        }
+        .btn-primary:hover { background-color: #218838; }
+        
+        .btn-outline-danger {
+            background-color: transparent;
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+        .btn-outline-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: var(--text-light);
+            color: white;
+        }
+        .btn-secondary:hover { background-color: #5a6268; }
+
+        /* --- Assign Box (From ManageBookings) --- */
+        .assign-box {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        .assign-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .assign-box select, .assign-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+        .assign-box select:focus, .assign-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.2);
+        }
+        .assign-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-assign {
+            background-color: var(--info);
+            color: white;
+        }
+        .btn-assign:hover { background-color: #0069d9; }
+
+        /* =========================================
+            ✅ RESPONSIVE CODE 
+        =========================================
+        */
+
+        /* --- Small Mobile (From Dashboard) --- */
+        @media (max-width: 768px) {
+            /* Stacks top-bar and main content vertically */
+            body {
+                flex-direction: column;
+            }
+
+            /* Converts sidebar to a horizontal top-bar */
+            .sidebar {
+                width: 100%;
+                height: 60px; /* Fixed height for top bar */
+                position: sticky; /* Sticks to the top */
+                top: 0;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between; /* Logo left, toggle right */
+                padding: 0 20px; /* Adjusted padding */
+            }
+
+            .sidebar h2 {
+                margin-bottom: 0;
+                font-size: 20px;
+            }
+
+            /* Show the toggle button */
+            .menu-toggle {
+                display: block;
+            }
+
+            /* This is the new link container */
+            .sidebar-links {
+                position: fixed;
+                top: 60px; /* Position below the top bar */
+                left: 0;
+                width: 250px; /* Same width as desktop sidebar */
+                height: calc(100vh - 60px); /* Full height minus top bar */
+                background: var(--secondary-color);
+                padding: 20px;
+                
+                /* Hide off-screen by default */
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                
+                /* Ensure links stack vertically */
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* This class is added by JS to show the menu */
+            .sidebar-links.open {
+                transform: translateX(0);
+            }
+
+            /* Reset nav and logout styles for vertical menu */
+            .sidebar-links nav {
+                flex: 1;
+            }
+            .sidebar a {
+                margin-bottom: 8px;
+            }
+            .sidebar a.logout {
+                margin-top: 20px;
+                margin-left: 0; /* Remove auto margin */
+            }
+
+            /* Removes the 250px margin so content takes full width */
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            /* --- Responsive styles from ManageBookings --- */
+            .header-with-counter {
+                gap: 10px;
+            }
+            .main h1 { 
+                font-size: 1.8rem; /* Adjusted from 2rem to fit better */
+            }
+            .booking-counter {
+                font-size: 1rem;
+                padding: 4px 10px;
+                margin-top: 2px;
+            }
+            .request-body { grid-template-columns: 1fr; }
+            .assign-form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <div class="logo">SharingYatra</div>
-  <nav>
-    <a href="/manageBooking" class="active"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>
-    <a href="/approvedRides"><i class="fa-solid fa-check-double"></i> Approved Bookings</a>
-    <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
-    <a href="/viewDriver"><i class="fa-solid fa-users"></i> View Drivers</a>
-    <a href="/addVehicles"><i class="fa-solid fa-car"></i> Add Vehicles</a>
-    <a href="/viewVehicles"><i class="fa-solid fa-car-side"></i> View Vehicles</a>
-    <a href="#"><i class="fa-solid fa-chart-line"></i> Earnings</a>
-    <a href="/dashboard"><i class="fa-solid fa-user-circle"></i> Profile</a>
-  </nav>
+    <h2>SharingYatra</h2>
 
-  <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    <button id="menu-toggle" class="menu-toggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar-links">
+        <nav>
+            <a href="/manageBooking" class="active"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>
+            <a href="/approvedRides"><i class="fa-solid fa-check-double"></i> Approved Bookings</a>
+            <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
+            <a href="/viewDriver"><i class="fa-solid fa-users"></i> View Drivers</a>
+            <a href="/addVehicles"><i class="fa-solid fa-car"></i> Add Vehicles</a>
+            <a href="/viewVehicles"><i class="fa-solid fa-car-side"></i> View Vehicles</a>
+            <a href="/earning"><i class="fa-solid fa-chart-line"></i> Earnings</a>
+            <a href="/dashboard"><i class="fa-solid fa-user-circle"></i> Profile</a>
+        </nav>
+        <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
 </div>
 
 <div class="main">
-  <h1>Pending Ride Requests</h1>
-
-  <% if (error) { %>
-    <div class="alert alert-danger"><%= error %></div>
-  <% } %>
-
-  <% if (typeof drivers !== 'undefined' && drivers.length === 0) { %>
-    <div class="alert alert-info">
-      Please <a href="/addDriver">add a driver</a> first to approve bookings. The system will automatically assign the first available driver upon approval.
+    <div class="header-with-counter">
+        <h1>Pending Ride Requests</h1>
+        <% if (bookings && bookings.length > 0) { %>
+            <span class="booking-counter"><%= bookings.length %></span>
+        <% } %>
     </div>
-  <% } %>
 
-  <% if (bookings && bookings.length > 0) { %>
-    <% bookings.forEach(booking => { %>
-      
-      <% const bookingDate = new Date(booking.date); %>
-      <% const requestDate = new Date(booking.requestDate); %>
+    <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
 
-      <div class="request" data-id="<%= booking._id %>" data-fare="<%= booking.fare || '' %>">
-        <div class="request-header">
-          <h3>User: <%= booking.customerName %></h3> 
-          <span class="date">Requested: <%= requestDate.toLocaleString('en-IN') %></span>
+    <% if (typeof drivers !== 'undefined' && drivers.length === 0) { %>
+        <div class="alert alert-info">
+        Please <a href="/addDriver">add a driver</a> first to approve bookings.
         </div>
+    <% } %>
+
+    <% if (bookings && bookings.length > 0) { %>
+        <% bookings.forEach(booking => { %>
         
-        <div class="request-body">
-          <div class="detail-item route">
-            <i class="fa-solid fa-route"></i>
-            <div>
-              <span class="label">Route</span>
-              <span class="value"><%= booking.from %> &nbsp;<i class="fa-solid fa-arrow-right"></i>&nbsp; <%= booking.to %></span>
-            </div>
-          </div>
-          
-          <div class="detail-item">
-            <i class="fa-solid fa-calendar-day"></i>
-            <div>
-              <span class="label">Ride Date</span>
-              <span class="value"><%= bookingDate.toLocaleDateString('en-IN') %></span>
-            </div>
-          </div>
+        <% const bookingDate = new Date(booking.date); %>
+        <% const requestDate = new Date(booking.requestDate); %>
 
-          <div class="detail-item">
-            <i class="fa-solid fa-clock"></i>
-            <div>
-              <span class="label">Ride Time</span>
-              <span class="value"><%= bookingDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %></span>
+        <div class="request" data-id="<%= booking._id %>" data-fare="<%= booking.fare || '' %>">
+            <div class="request-header">
+                <h3>User: <%= booking.customerName %></h3> 
+                <span class="date">Requested: <%= requestDate.toLocaleString('en-IN') %></span>
             </div>
-          </div>
-
-          <div class="detail-item">
-            <i class="fa-solid fa-envelope"></i>
-            <div>
-              <span class="label">Email</span>
-              <span class="value"><%= booking.customerEmail %></span>
-            </div>
-          </div>
-
-          <div class="detail-item">
-            <i class="fa-solid fa-phone"></i>
-            <div>
-              <span class="label">Mobile</span>
-              <span class="value"><%= booking.mobile %></span> 
-            </div>
-          </div>
-          
-          <div class="detail-item">
-            <i class="fa-solid fa-indian-rupee-sign"></i>
-            <div>
-              <span class="label">Quoted Fare</span>
-              <span class="value"><%= booking.fare || 'N/A' %></span>
-            </div>
-          </div>
-
-          <div class="detail-item">
-            <i class="fa-solid fa-car"></i>
-            <div>
-              <span class="label">Requested Vehicle</span>
-              <span class="value">
-                <% if (booking.vehicleId && booking.vehicleId.vehicle_name) { %>
-                  <%= booking.vehicleId.vehicle_name %> (<%= booking.vehicleId.number_plate %>)
-                <% } else { %>
-                  Any Vehicle
-                <% } %>
-              </span>
-            </div>
-          </div>
-
-<div class="detail-item">
-    <i class="fa-solid fa-car"></i>
-    <div>
-        <span class="label">Driver Name</span>
-        <span class="value">
             
-            <% 
-                // 1. Get the ID of the vehicle for the current booking
-                const vehicleId = booking.vehicleId._id.toString(); 
-
-                // 2. Find the driver in the 'drivers' list whose assignedVehicle matches this ID
-                const matchedDriver = drivers.find(driver => 
-                    driver.assignedVehicle && driver.assignedVehicle._id.toString() === vehicleId
-                );
-            %>
-
-            <% if (matchedDriver) { %>
-                <%= matchedDriver.fullName %> 
+            <div class="request-body">
+                <div class="detail-item route">
+                    <i class="fa-solid fa-route"></i>
+                    <div>
+                        <span class="label">Route</span>
+                        <span class="value"><%= booking.from %> &nbsp;<i class="fa-solid fa-arrow-right"></i>&nbsp; <%= booking.to %></span>
+                    </div>
+                </div>
                 
-                (<%= booking.vehicleId.vehicle_name %>)
-            <% } else { %>
-                No Assigned Driver / Any Available
-            <% } %>
-            
-        </span>
-    </div>
-</div>
-        
-        <div class="actions">
-          <form action="/approvebooking" method="POST">
-             <div class="assign-box">
-                <div class="assign-form-grid" style="grid-template-columns: 1fr; margin-bottom: 10px;">
-                    <input 
-                        type="number" 
-                        placeholder="Set Fare (₹)" 
-                        name="fare" 
-                        value="<%= booking.fare || '' %>" 
-                        readonly
-                        required>
+                <div class="detail-item">
+                    <i class="fa-solid fa-calendar-day"></i>
+                    <div>
+                        <span class="label">Ride Date</span>
+                        <span class="value"><%= bookingDate.toLocaleDateString('en-IN') %></span>
+                    </div>
                 </div>
-                <div class="actions-buttons">
-                    <input type="hidden" name="requestId" value="<%= booking._id %>">
-                    <input type="hidden" name="driverID" value="<%= booking.driverID %>">
-                    
-                    <button type="submit" class="btn btn-primary btn-assign" <%= drivers.length === 0 ? 'disabled' : '' %>>
-                        <%= drivers.length === 0 ? 'No Driver Available' : 'Approve & Sent Email' %>
-                    </button>
-                    
-                    <button type="button" class="btn btn-outline-danger" onclick="document.getElementById('reject-<%= booking._id %>').submit()">Reject</button>
+
+                <div class="detail-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <div>
+                        <span class="label">Ride Time</span>
+                        <span class="value"><%= bookingDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %></span>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <div>
+                        <span class="label">Email</span>
+                        <span class="value"><%= booking.customerEmail %></span>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <div>
+                        <span class="label">Mobile</span>
+                        <span class="value"><%= booking.mobile %></span> 
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    <div>
+                        <span class="label">Quoted Fare</span>
+                        <span class="value"><%= booking.fare || 'N/A' %></span>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <i class="fa-solid fa-car"></i>
+                    <div>
+                        <span class="label">Requested Vehicle</span>
+                        <span class="value">
+                        <% if (booking.vehicleId && booking.vehicleId.vehicle_name) { %>
+                            <%= booking.vehicleId.vehicle_name %> (<%= booking.vehicleId.number_plate %>)
+                        <% } else { %>
+                            Any Vehicle
+                        <% } %>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <i class="fa-solid fa-user-tie"></i> 
+                    <div>
+                        <span class="label">Driver Name</span>
+                        <span class="value">
+                            
+                            <% 
+                                let matchedDriver = null;
+                                if (booking.vehicleId && booking.vehicleId._id && typeof drivers !== 'undefined') {
+                                    const vehicleId = booking.vehicleId._id.toString(); 
+                                    matchedDriver = drivers.find(driver => 
+                                        driver.assignedVehicle && 
+                                        driver.assignedVehicle._id.toString() === vehicleId
+                                    );
+                                }
+                            %>
+                            
+                            <% if (matchedDriver) { %>
+                                <%= matchedDriver.fullName %> 
+                                (<%= booking.vehicleId.vehicle_name %>)
+                            <% } else if (booking.vehicleId) { %>
+                                No driver assigned to this vehicle
+                            <% } else { %>
+                                Any Available Driver
+                            <% } %>
+                            
+                        </span>
+                    </div>
                 </div>
             </div>
-          </form>
+        
+            <div class="actions">
+                <form action="/approvebooking" method="POST">
+                    <div class="assign-box">
+                        <div class="assign-form-grid" style="grid-template-columns: 1fr; margin-bottom: 10px;">
+                            <input 
+                                type="number" 
+                                placeholder="Set Fare (₹)" 
+                                name="fare" 
+                                value="<%= booking.fare || '' %>" 
+                                readonly
+                                required>
+                        </div>
+                        <div class="actions-buttons">
+                            <input type="hidden" name="requestId" value="<%= booking._id %>">
+                            
+                            <%
+                                let assignedDriverID = '';
+                                if (booking.vehicleId && booking.vehicleId._id && typeof drivers !== 'undefined') {
+                                    const vehicleId = booking.vehicleId._id.toString();
+                                    const matchedDriver = drivers.find(driver => 
+                                        driver.assignedVehicle && driver.assignedVehicle._id.toString() === vehicleId
+                                    );
+                                    if (matchedDriver) {
+                                        assignedDriverID = matchedDriver._id;
+                                    }
+                                }
+                            %>
+                            <input type="hidden" name="driverID" value="<%= assignedDriverID %>">
+                            
+                            <button type="submit" class="btn btn-primary btn-assign" <%= (typeof drivers === 'undefined' || drivers.length === 0 || !assignedDriverID) ? 'disabled' : '' %>>
+                                <% if (typeof drivers === 'undefined' || drivers.length === 0) { %>
+                                    No Drivers Available
+                                <% } else if (!assignedDriverID) { %>
+                                    No Driver For This Vehicle
+                                <% } else { %>
+                                    Set Fare & Approve
+                                <% } %>
+                            </button>
+                            
+                            <button type="button" class="btn btn-outline-danger" onclick="document.getElementById('reject-<%= booking._id %>').submit()">Reject</button>
+                        </div>
+                    </div>
+                </form>
 
-          <form action="/rejectbooking" method="POST" id="reject-<%= booking._id %>" style="display: none;">
-              <input type="hidden" name="requestId" value="<%= booking._id %>">
-          </form>
+                <form action="/rejectbooking" method="POST" id="reject-<%= booking._id %>" style="display: none;">
+                    <input type="hidden" name="requestId" value="<%= booking._id %>">
+                </form>
+            </div>
         </div>
-      </div>
-    <% }) %>
-  <% } else if (!error) { %>
-    <p class="no-requests">No pending requests found.</p>
-  <% } %>
+        <% }) %>
+    <% } else if (!error) { %>
+        <p class="no-requests">No pending requests found.</p>
+    <% } %>
 </div>
 
 <script>
-    // Pass EJS variable to JS
-const agencyDrivers = <%- JSON.stringify(typeof drivers !== 'undefined' ? drivers : []) %>;
+    // Pass EJS variable to JS (in case you need it for future JS)
+    const agencyDrivers = <%- JSON.stringify(typeof drivers !== 'undefined' ? drivers : []) %>;
 
-document.addEventListener('DOMContentLoaded', () => {
-  
-  document.querySelector('.main').addEventListener('click', async (e) => {
-    
-    // --- Handle "Approve" button click ---
-    if (e.target.classList.contains('approve-btn')) {
-      const btn = e.target;
-      const parentCard = btn.closest('.request');
-      const actionsDiv = parentCard.querySelector('.actions');
-      
-      if (actionsDiv.querySelector('.assign-box')) return;
-      
-      if (agencyDrivers.length === 0) {
-        alert('You must add a driver before you can approve a booking.');
-        return;
-      }
+    document.addEventListener('DOMContentLoaded', () => {
 
-      const assignBox = document.createElement('div');
-      assignBox.className = 'assign-box';
-
-      const form = document.createElement('form');
-      form.action = '/approvebooking';
-      form.method = 'POST';
-
-      
-      const requestId = parentCard.getAttribute('data-id');
-      const requestedFare = parentCard.getAttribute('data-fare') || '';
-
-      const driverOptions = agencyDrivers.map(driver => {
-        const vehicleInfo = driver.assignedVehicle 
-          ? `${driver.assignedVehicle.vehicle_name} (${driver.assignedVehicle.number_plate})` 
-          : 'N/A';
-          
-        return `<option value="${driver._id}">${driver.fullName} (Vehicle: ${vehicleInfo})</option>`;
-      }).join('');
-
-      // --- 
-      // --- THIS IS THE CORRECTED SCRIPT BLOCK ---
-      // --- 
-      form.innerHTML = `
-        <div class="assign-form-grid">
-          <select name="driverID" required> 
-            <option value="" disabled selected>Select a Driver</option>
-            ${driverOptions}
-          </select>
-          <input 
-            type="number" 
-            placeholder="Set Fare (₹)" 
-            name="fare" 
-            value="${requestedFare}" 
-            required>
-        </div>
-        <div class="assign-actions">
-          <input type="hidden" name="requestId" value="${requestId}">
-          
-          <button type="submit" class="btn btn-assign">Assign Ride</button>
-          <button type="button" class="btn btn-secondary cancel-assign-btn">Cancel</button>
-        </div>
-      `;
-      // --- END OF CORRECTION ---
-
-      assignBox.appendChild(form);
-      actionsDiv.appendChild(assignBox);
-      
-      btn.disabled = true;
-    }
-    
-    // --- Handle "Cancel" button click ---
-    if (e.target.classList.contains('cancel-assign-btn')) {
-      const parentCard = e.target.closest('.request');
-      const assignBox = e.target.closest('.assign-box');
-      
-      if (assignBox) {
-        assignBox.remove();
-      }
-      
-      const approveBtn = parentCard.querySelector('.approve-btn');
-      if (approveBtn) {
-        approveBtn.disabled = false;
-      }
-    }
-  });
-});
+        // --- Sidebar Toggle Functionality ---
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar-links').classList.toggle('open');
+        });
+        
+    });
 </script>
-
-
-
 
 </body>
 </html>
