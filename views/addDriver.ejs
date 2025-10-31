@@ -1,11 +1,12 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Driver - Agency Dashboard</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -28,16 +29,16 @@
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         
-        /* UPDATED: Use a slightly lighter hover for the sidebar */
+        /* Use a slightly darker bg for hover, matching your old sidebar */
         .sidebar-link:hover { background-color: #334155; /* slate-700 */ }
         
-        /* UPDATED: Use your brand's primary color for the active link */
-        .sidebar-link.active { background-color: #ff6b4a; /* var(--primary-color) */ color: #ffffff; }
+        /* Use your brand's primary color for the active link */
+        .sidebar-link.active { background-color: #ff6b4a; /* primary */ color: #ffffff; }
 
         .spinner { border: 2px solid rgba(255, 255, 255, 0.2); width: 16px; height: 16px; border-radius: 50%; border-left-color: #ffffff; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* UPDATED: Use brand's primary color for error focus ring */
+        /* Use brand's primary color for error focus ring */
         .input-error { border-color: #ef4444; background-color: #fee2e2; }
         .input-error:focus { border-color: #ef4444; --tw-ring-color: #ef4444; }
         .error-message { color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem; /* Added margin */ }
@@ -48,18 +49,52 @@
 <body class="bg-slate-100">
 
 <div class="flex h-screen">
-    <div id="sidebar" class="fixed inset-y-0 left-0 bg-slate-800 text-slate-300 w-64 space-y-6 py-7 px-2 transform -translate-x-full lg:translate-x-0 z-30">
-        <a href="#" class="text-primary text-2xl font-extrabold px-4">SharingYatra</a>
-        <nav>
-            <a href="/manageBooking" class="sidebar-link block py-2.5 px-4 rounded transition-colors">Manage Bookings</a>
-            <a href="/addDriver" class="sidebar-link block py-2.5 px-4 rounded transition-colors active">Add Drivers</a>
-            <a href="#" class="sidebar-link block py-2.5 px-4 rounded transition-colors">Vehicles</a>
-            <a href="#" class="sidebar-link block py-2.5 px-4 rounded transition-colors">Earnings</a>
-            <a href="/dashboard" class="sidebar-link block py-2.5 px-4 rounded transition-colors">Profile</a>
-            <a href="/logout" class="sidebar-link block py-2.5 px-4 rounded transition-colors">Logout</a>
-        </nav>
-    </div>
+    
+    <div id="sidebar" class="fixed inset-y-0 left-0 bg-secondary text-slate-200 w-64 flex flex-col py-7 px-2 transform -translate-x-full lg:translate-x-0 z-30">
+        
+        <a href="/dashboard" class="text-primary text-2xl font-extrabold px-4 mb-6">SharingYatra</a>
 
+        <div class="flex-1"> <nav class="space-y-1"> <a href="/manageBooking" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-calendar-check w-5 text-center"></i>
+                    <span>Manage Bookings</span>
+                </a>
+                <a href="/approvedRides" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-check-double w-5 text-center"></i>
+                    <span>Approved Bookings</span>
+                </a>
+                <a href="/addDriver" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors active">
+                    <i class="fa-solid fa-user-plus w-5 text-center"></i>
+                    <span>Add Drivers</span>
+                </a>
+                <a href="/viewDriver" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span>View Drivers</span>
+                </a>
+                <a href="/addVehicles" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-car w-5 text-center"></i>
+                    <span>Add Vehicles</span>
+                </a>
+                <a href="/viewVehicles" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-car-side w-5 text-center"></i>
+                    <span>View Vehicles</span>
+                </a>
+                <a href="/earning" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                    <span>Earnings</span>
+                </a>
+                <a href="/dashboard" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-user-circle w-5 text-center"></i>
+                    <span>Profile</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-6"> <a href="/logout" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
     <div class="flex-1 flex flex-col overflow-hidden lg:ml-64">
         <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 flex-shrink-0">
             <button id="menu-button" class="lg:hidden text-slate-500 hover:text-slate-700">
@@ -67,7 +102,9 @@
             </button>
             
             <h2 class="text-2xl font-semibold text-secondary">Add New Driver</h2>
-            <div class="w-6"></div> </header>
+            
+            <div class="w-6"></div> 
+        </header>
         
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 max-w-5xl mx-auto">
@@ -166,7 +203,7 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div>
                                         <input type="password" id="tempPassword" name="tempPassword" required minlength="8" placeholder="Minimum 8 characters" class="w-full bg-white pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                                         <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700">
-                                            <svg id="eye-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            <svg id="eye-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.SAX-7z"></path></svg>
                                             <svg id="eye-closed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 1.274-4.057 5.064-7 9.542-7 .847 0 1.67.126 2.463.362m3.693 11.266A9.969 9.969 0 0021.542 12c-1.274-4.057-5.064-7-9.542-7a9.969 9.969 0 00-3.693 1.132M3 3l18 18"></path></svg>
                                         </button>
                                     </div>
@@ -176,7 +213,8 @@
                                     <label for="assignedVehicle" class="block text-sm font-medium text-slate-700 mb-1">Assign Vehicle (Optional)</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 4h-4L6 20h4l4-16z"></path></svg>
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-2m-4 0V4m0 12v4m0 0H6m4 0h4m-4 0H6M6 12H4m16 0h-2m-4-4h4m-4 4h4m-4 4h4M6 12H4m16 0h-2m-4-4h4m-4 4h4m-4 4h4"></path></svg>
+                                            <i class="fa-solid fa-car w-5 h-5 text-slate-400"></i>
                                         </div>
                                         <select id="assignedVehicle" name="assignedVehicle" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                                             <option value="">Do not assign a vehicle</option>
@@ -212,8 +250,6 @@
 </div>
 
 <script>
-    // --- All your excellent JS logic remains unchanged ---
-
     // --- Mobile Sidebar Logic ---
     const sidebar = document.getElementById('sidebar');
     const menuButton = document.getElementById('menu-button');
@@ -249,10 +285,10 @@
     });
 
     function validateInput(input) {
-        // UPDATED: Changed selector to be more robust for the new layout
+        // Find the parent container (sm:col-span-1 or sm:col-span-2)
         const formGroup = input.closest('div[class*="sm:col-span-"]');
         if (!formGroup) return true; // Failsafe
-        
+
         const errorMessageElement = formGroup.querySelector('.error-message');
         if (!errorMessageElement) return true; // Failsafe
 
@@ -289,7 +325,6 @@
         
         setLoading(true);
 
-        // --- START: CORRECTED API CALL LOGIC ---
         const formData = new FormData(addDriverForm);
         const data = Object.fromEntries(formData.entries());
 
@@ -306,9 +341,14 @@
 
             if (response.ok) { // Check if HTTP status is 2xx
                 displayMessage(result.message, 'success');
-                // Temporarily redirect to see the new vehicle list update
-                // Consider redirecting to the *driver list* page instead
-                setTimeout(() => window.location.reload(), 1500); 
+                addDriverForm.reset(); // Clear the form on success
+                // Scroll to top to see message
+                window.scrollTo(0, 0);
+                // Reload or redirect after a delay
+                setTimeout(() => {
+                    // Redirect to the new 'view drivers' page
+                    window.location.href = '/viewDriver'; 
+                }, 1500); 
             } else {
                 displayMessage(result.message, 'error');
                 window.scrollTo(0, 0);
@@ -320,7 +360,6 @@
         } finally {
             setLoading(false); // Always re-enable the button
         }
-        // --- END: CORRECTED API CALL LOGIC ---
     });
 
     function setLoading(isLoading) {
@@ -334,7 +373,7 @@
         const errorIcon = `<svg class="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>`;
         const bgColor = type === 'success' ? 'bg-green-100' : 'bg-red-100';
         const textColor = type === 'success' ? 'text-green-800' : 'text-red-800';
-        const icon = type === 'success' ? successIcon : errorIcon;
+        const icon = type ==='success' ? successIcon : errorIcon;
         
         messageArea.innerHTML = `
             <div class="flex items-center p-4 rounded-lg text-sm ${bgColor} ${textColor}">
