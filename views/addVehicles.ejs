@@ -1,45 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-R">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Vehicle - Agency Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff6b4a',
+                        'primary-hover': '#e65c40', 
+                        secondary: '#2c3e50',
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #0f172a; color: #ffffff; }
+        
+        /* Updated sidebar link styles to match your other pages */
+        .sidebar-link:hover { background-color: #334155; /* slate-700 */ }
+        .sidebar-link.active { background-color: #ff6b4a; /* primary */ color: #ffffff; }
+
         .spinner { border: 2px solid rgba(255, 255, 255, 0.2); width: 16px; height: 16px; border-radius: 50%; border-left-color: #ffffff; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .input-error { border-color: #ef4444; background-color: #fee2e2; }
         .input-error:focus { border-color: #ef4444; --tw-ring-color: #ef4444; }
         .error-message { color: #dc2626; font-size: 0.875rem; margin-top: 0.25rem; }
+        
         .sidebar { transition: transform 0.3s ease-in-out; }
     </style>
 </head>
 <body class="bg-slate-100">
 
 <div class="flex h-screen">
-    <div id="sidebar" class="fixed inset-y-0 left-0 bg-slate-800 text-slate-300 w-64 space-y-6 py-7 px-2 transform -translate-x-full lg:translate-x-0 z-30">
-        <a href="#" class="text-white text-2xl font-extrabold px-4">SharingYatra</a>
-        <nav>
-            <a href="/manageBooking" class="sidebar-link block py-2.5 px-4 rounded">Manage Bookings</a>
-            <a href="/addDriver" class="sidebar-link block py-2.5 px-4 rounded active">Add Drivers</a>
-            <a href="#" class="sidebar-link block py-2.5 px-4 rounded">Vehicles</a>
-            <a href="#" class="sidebar-link block py-2.5 px-4 rounded">Earnings</a>
-            <a href="/dashboard" class="sidebar-link block py-2.5 px-4 rounded">Profile</a>
-            <a href="/logout" class="sidebar-link block py-2.5 px-4 rounded">Logout</a>
-        </nav>
-    </div>
+    
+    <div id="sidebar" class="fixed inset-y-0 left-0 bg-secondary text-slate-200 w-64 flex flex-col py-7 px-2 transform -translate-x-full lg:translate-x-0 z-30">
+        
+        <a href="/dashboard" class="text-primary text-2xl font-extrabold px-4 mb-6">SharingYatra</a>
 
+        <div class="flex-1"> <nav class="space-y-1">
+                <a href="/manageBooking" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-calendar-check w-5 text-center"></i>
+                    <span>Manage Bookings</span>
+                </a>
+                <a href="/approvedRides" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-check-double w-5 text-center"></i>
+                    <span>Approved Bookings</span>
+                </a>
+                <a href="/addDriver" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-user-plus w-5 text-center"></i>
+                    <span>Add Drivers</span>
+                </a>
+                <a href="/viewDriver" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span>View Drivers</span>
+                </a>
+                <a href="/addVehicles" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors active">
+                    <i class="fa-solid fa-car w-5 text-center"></i>
+                    <span>Add Vehicles</span>
+                </a>
+                <a href="/viewVehicles" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-car-side w-5 text-center"></i>
+                    <span>View Vehicles</span>
+                </a>
+                <a href="/earning" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                    <span>Earnings</span>
+                </a>
+                <a href="/dashboard" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                    <i class="fa-solid fa-user-circle w-5 text-center"></i>
+                    <span>Profile</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-6">
+            <a href="/logout" class="sidebar-link flex items-center gap-3 py-2.5 px-4 rounded-lg transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
     <div class="flex-1 flex flex-col overflow-hidden lg:ml-64">
         <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 flex-shrink-0">
             <button id="menu-button" class="lg:hidden text-slate-500 hover:text-slate-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <h2 class="text-2xl font-bold text-slate-800">Add New Vehicle</h2>
+            <h2 class="text-2xl font-semibold text-secondary">Add New Vehicle</h2> 
             <div class="w-6"></div>
         </header>
         
@@ -49,47 +109,47 @@
                 
                 <form id="addVehicleForm" class="space-y-8" novalidate>
                     <fieldset>
-                        <legend class="text-xl font-semibold text-slate-800 mb-4 border-b pb-3">Vehicle Details</legend>
+                        <legend class="text-xl font-semibold text-secondary mb-4 border-b pb-3">Vehicle Details</legend>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
                             <div>
                                 <label for="vehicle_name" class="block text-sm font-medium text-slate-700 mb-1">Vehicle Name</label>
-                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13h18M3 18h18M3 8h18"></path></svg></div><input type="text" id="vehicle_name" name="vehicle_name" required placeholder="e.g., Toyota Innova" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-car w-5 text-slate-400"></i></div><input type="text" id="vehicle_name" name="vehicle_name" required placeholder="e.g., Toyota Innova" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></div>
                                 <p class="error-message hidden"></p>
                             </div>
                             <div>
                                 <label for="model" class="block text-sm font-medium text-slate-700 mb-1">Model</label>
-                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div><input type="text" id="model" name="model" required placeholder="e.g., 2023" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-calendar-days w-5 text-slate-400"></i></div><input type="text" id="model" name="model" required placeholder="e.g., 2023" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></div>
                                 <p class="error-message hidden"></p>
                             </div>
                             <div>
                                 <label for="number_plate" class="block text-sm font-medium text-slate-700 mb-1">Number Plate</label>
-                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5 5-5-5"></path></svg></div><input type="text" id="number_plate" name="number_plate" required placeholder="e.g., MH 12 AB 1234" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-id-card w-5 text-slate-400"></i></div><input type="text" id="number_plate" name="number_plate" required placeholder="e.g., MH 12 AB 1234" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></div>
                                 <p class="error-message hidden"></p>
                             </div>
                             <div>
                                 <label for="rc_number" class="block text-sm font-medium text-slate-700 mb-1">RC Number</label>
-                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-4 0h4"></path></svg></div><input type="text" id="rc_number" name="rc_number" required placeholder="e.g., MH1420230001234" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-4 0h4"></path></svg></div><input type="text" id="rc_number" name="rc_number" required placeholder="e.g., MH1420230001234" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></div>
                                 <p class="error-message hidden"></p>
                             </div>
                             <div>
                                 <label for="insurance_number" class="block text-sm font-medium text-slate-700 mb-1">Insurance Number</label>
-                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><input type="text" id="insurance_number" name="insurance_number" required placeholder="e.g., 1234567890" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-shield-halved w-5 text-slate-400"></i></div><input type="text" id="insurance_number" name="insurance_number" required placeholder="e.g., 1234567890" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></div>
                                 <p class="error-message hidden"></p>
                             </div>
                             <div>
                                 <label for="owner_name" class="block text-sm font-medium text-slate-700 mb-1">Owner Name</label>
-                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div><input type="text" id="owner_name" name="owner_name" required placeholder="e.g., John Doe" class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></div>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-user-tie w-5 text-slate-400"></i></div><input type="text" id="owner_name" name="owner_name" required placeholder="e.g., John Doe" class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></div>
                                 <p class="error-message hidden"></p>
                             </div>
                             <div>
                                 <label for="ac_type" class="block text-sm font-medium text-slate-700 mb-1">AC Type</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                                    <select id="ac_type" name="ac_type" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-fan w-5 text-slate-400"></i></div>
+                                    <select id="ac_type" name="ac_type" required class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                                         <option value="" disabled selected>Select AC Type</option>
                                         <option value="AC">AC</option>
                                         <option value="Non-AC">Non-AC</option>
-                                        <option value="Both">Both</option>
                                     </select>
                                 </div>
                                 <p class="error-message hidden"></p>
@@ -97,8 +157,8 @@
                             <div>
                                 <label for="vehicle_type" class="block text-sm font-medium text-slate-700 mb-1">Vehicle Type</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></div>
-                                    <select id="vehicle_type" name="vehicle_type" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-car-side w-5 text-slate-400"></i></div>
+                                    <select id="vehicle_type" name="vehicle_type" required class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                                         <option value="" disabled selected>Select Vehicle Type</option>
                                         <option value="Premium">Premium</option>
                                         <option value="Normal">Normal</option>
@@ -111,8 +171,8 @@
                              <div>
                                 <label for="max_capacity" class="block text-sm font-medium text-slate-700 mb-1">Max Capacity</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20l-5-5-5 5"></path></svg></div>
-                                    <select id="max_capacity" name="max_capacity" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-users w-5 text-slate-400"></i></div>
+                                    <select id="max_capacity" name="max_capacity" required class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                                         <option value="" disabled selected>Select Max Capacity</option>
                                         <option value="4">4</option>
                                         <option value="6">6</option>
@@ -125,8 +185,8 @@
                             <div>
                                 <label for="rate_per_km" class="block text-sm font-medium text-slate-700 mb-1">Rate per Km</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 12a4 4 0 11-8 0 4 4 0 018 0zm-8 12a1 1 0 100-2 1 1 0 000 2zm-12 0a1 1 0 100-2 1 1 0 000 2z"></path></svg></div>
-                                    <select id="rate_per_km" name="rate_per_km" required class="w-full bg-slate-50 pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-indian-rupee-sign w-5 text-slate-400"></i></div>
+                                    <select id="rate_per_km" name="rate_per_km" required class="w-full bg-white pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                                         <option value="" disabled selected>Select Rate</option>
                                     </select>
                                 </div>
@@ -134,9 +194,10 @@
                             </div>
                         </div>
                     </fieldset>
+                    
                     <div class="pt-6 border-t border-slate-200 flex justify-end">
-                        <button type="submit" id="submitButton" class="flex items-center justify-center bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300 disabled:bg-blue-400 shadow-sm hover:shadow-md">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        <button type="submit" id="submitButton" class="flex items-center justify-center bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-300 disabled:bg-primary/50 shadow-sm hover:shadow-md">
+                            <i class="fa-solid fa-plus w-5 h-5 mr-2"></i>
                             <span id="buttonText">Add Vehicle</span>
                             <div id="buttonSpinner" class="spinner hidden ml-2"></div>
                         </button>
@@ -197,7 +258,10 @@
     });
 
     function validateInput(input) {
-        const errorMessageElement = input.parentElement.parentElement.querySelector('.error-message');
+        // This selector finds the <p> tag inside the grid <div>
+        const errorMessageElement = input.closest('div.relative').parentElement.querySelector('.error-message');
+        if (!errorMessageElement) return true; // Failsafe
+
         if (!input.checkValidity()) {
             input.classList.add('input-error');
             errorMessageElement.textContent = input.validationMessage;
@@ -231,7 +295,6 @@
         
         setLoading(true);
 
-        // --- START: CORRECTED API CALL LOGIC ---
         const formData = new FormData(addVehicleForm);
         const data = Object.fromEntries(formData.entries());
 
@@ -252,7 +315,7 @@
                 ratePerKmSelect.innerHTML = '<option value="" disabled selected>Select Rate</option>'; // Reset Rate options
                 inputs.forEach(input => {
                     input.classList.remove('input-error');
-                    const errorMsg = input.parentElement.parentElement.querySelector('.error-message');
+                    const errorMsg = input.closest('div.relative').parentElement.querySelector('.error-message');
                     if (errorMsg) errorMsg.classList.add('hidden');
                 });
                 window.scrollTo(0, 0);
@@ -267,7 +330,6 @@
         } finally {
             setLoading(false); // Always re-enable the button
         }
-        // --- END: CORRECTED API CALL LOGIC ---
     });
 
     function setLoading(isLoading) {
