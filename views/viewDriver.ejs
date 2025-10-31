@@ -1,221 +1,466 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Drivers | SharingYatra</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <style>
-    :root {
-      --primary-color: #ff6b4a;
-      --secondary-color: #2c3e50;
-      --light-gray: #f4f4f4;
-      --dark-gray: #555;
-      --white: #ffffff;
-      --success: #28a745;
-      --danger: #dc3545;
-      --info: #007bff;
-      --warning: #ffc107;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { display: flex; background: var(--light-gray); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Drivers | SharingYatra</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Variables from Dashboard */
+            --primary-color: #ff6b4a;
+            --secondary-color: #2c3e50;
+            --dark-gray: #555;
+            
+            /* Variables from ManageBookings */
+            --bg-light: #f7f8fc; /* Using this as the main light gray */
+            --text-dark: #333;
+            --text-light: #667;
+            --white: #ffffff;
+            --border-color: #dfe6f0;
+            --success: #28a745;
+            --danger: #dc3545;
+            --info: #007bff;
+            --warning: #ffc107; /* Added warning for edit button */
+        }
 
-    .sidebar { width: 250px; height: 100vh; background: var(--secondary-color); padding: 30px 20px; color: var(--white); position: fixed; top: 0; left: 0; }
-    .sidebar h2 { color: var(--primary-color); font-size: 24px; margin-bottom: 30px; }
-    .sidebar a { display: block; color: var(--white); text-decoration: none; padding: 10px; margin-bottom: 10px; border-left: 3px solid transparent; transition: all 0.3s ease; }
-    .sidebar a:hover, .sidebar a.active { color: var(--primary-color); border-left: 3px solid var(--primary-color); background: rgba(255,255,255,0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .main { flex: 1; padding: 30px; margin-left: 250px; }
-    h1 { margin-bottom: 20px; color: var(--secondary-color); }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            background: var(--bg-light);
+        }
 
-    .table-container { background: var(--white); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 15px; text-align: left; }
-    th { background-color: var(--secondary-color); color: var(--white); font-weight: 600; }
-    tr:nth-child(even) { background-color: var(--light-gray); }
-    td.actions-cell { display: flex; gap: 10px; align-items: center; }
+        /* --- Sidebar (From ManageBookings) --- */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: var(--secondary-color);
+            padding: 30px 20px;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000; /* Ensure sidebar is on top */
+        }
+        .sidebar h2 { 
+            color: var(--primary-color); 
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 35px;
+            padding-left: 5px;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.6rem;
+            cursor: pointer;
+        }
 
-    .action-btn { padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: var(--white); transition: opacity 0.3s; }
-    .action-btn:hover { opacity: 0.8; }
-    .edit-btn { background-color: var(--warning); }
-    .delete-btn { background-color: var(--danger); }
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            flex: 1; /* This makes it fill the space */
+        }
+        
+        .sidebar-links nav {
+            flex: 1; /* Pushes logout link to the bottom */
+        }
 
-    .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 16px; }
-    .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .alert-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar a i { width: 20px; text-align: center; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: none; align-items: center; justify-content: center; }
-    .modal-content { background: var(--white); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-    .modal-content h2 { color: var(--secondary-color); margin-bottom: 20px; }
-    .modal-content .form-group { margin-bottom: 15px; }
-    .modal-content label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--dark-gray); }
-    .modal-content input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-    .modal-actions { margin-top: 20px; text-align: right; }
-    .modal-actions button { padding: 10px 20px; margin-left: 10px; }
-    .btn-cancel { background: #6c757d; }
-  </style>
+        .sidebar a:hover,
+        .sidebar a.active {
+            color: var(--white);
+            background: var(--primary-color);
+        }
+
+        .sidebar a.logout {
+            margin-top: 20px;
+        }
+
+        /* --- Main Content --- */
+        .main { flex: 1; padding: 30px; margin-left: 250px; }
+        
+        h1 { 
+            margin-bottom: 25px; 
+            color: var(--secondary-color);
+            font-size: 2.5rem; /* Matched from ManageBookings */
+        }
+
+        /* --- Table Styles (Updated) --- */
+        .table-container { 
+            background: var(--white); 
+            border-radius: 12px; /* Softer radius */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Softer shadow */
+            overflow: hidden; 
+            border: 1px solid var(--border-color);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        
+        th, td { padding: 16px 20px; text-align: left; }
+        
+        th { 
+            background-color: #fafbfc; /* Lighter header */
+            color: var(--text-light);
+            font-weight: 600; 
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        
+        tr { border-bottom: 1px solid var(--border-color); }
+        tr:last-child { border-bottom: none; }
+        
+        /* Removed zebra striping for a cleaner look
+           tr:nth-child(even) { background-color: var(--bg-light); } 
+        */
+        
+        td {
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        td.actions-cell { display: flex; gap: 10px; align-items: center; }
+
+        /* --- Button Styles (Updated) --- */
+        .action-btn { 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 8px; /* Softer radius */
+            font-weight: 600; /* Bolder */
+            cursor: pointer; 
+            color: var(--white); 
+            transition: all 0.3s ease; 
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-btn:hover { opacity: 0.85; }
+        
+        .edit-btn { background-color: var(--warning); color: var(--text-dark); }
+        .delete-btn { background-color: var(--danger); }
+
+        /* --- Alert Styles (Updated) --- */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .alert-error { /* Renamed */
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            color: #004085;
+            background-color: #cce5ff;
+            border: 1px solid #b8daff;
+        }
+
+        /* --- Modal Styles (Updated) --- */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); /* Slightly darker overlay */
+            z-index: 100; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            backdrop-filter: blur(2px);
+        }
+        .modal-content { 
+            background: var(--white); 
+            padding: 30px; 
+            border-radius: 12px; /* Softer radius */
+            width: 90%; 
+            max-width: 500px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); 
+        }
+        .modal-content h2 { color: var(--secondary-color); margin-bottom: 20px; }
+        .modal-content .form-group { margin-bottom: 15px; }
+        .modal-content label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-dark); }
+        .modal-content input { 
+            width: 100%; 
+            padding: 12px; /* More padding */
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; /* Softer radius */
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.2);
+        }
+        .modal-actions { margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px; }
+        
+        .btn-cancel { background: #6c757d; } /* Default gray */
+
+        /* =========================================
+            ✅ RESPONSIVE CODE 
+        =========================================
+        */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                height: 60px;
+                position: sticky;
+                top: 0;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 20px;
+            }
+            .sidebar h2 { margin-bottom: 0; font-size: 20px; }
+            .menu-toggle { display: block; }
+            .sidebar-links {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 250px;
+                height: calc(100vh - 60px);
+                background: var(--secondary-color);
+                padding: 20px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                display: flex;
+                flex-direction: column;
+            }
+            .sidebar-links.open { transform: translateX(0); }
+            .sidebar-links nav { flex: 1; }
+            .sidebar a { margin-bottom: 8px; }
+            .sidebar a.logout { margin-top: 20px; margin-left: 0; }
+            .main { margin-left: 0; padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            
+            /* Make table scrollable on mobile */
+            .table-container {
+                overflow-x: auto;
+            }
+            table {
+                min-width: 800px; /* Force table to be wide */
+            }
+        }
+    </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <h2>SharingYatra</h2>
-  <a href="/manageBooking">Manage Bookings</a>
-  <a href="/addDriver">Add Drivers</a>
-  <a href="/viewDriver" class="active">View Drivers</a>
-  <a href="#">Vehicles</a>
-  <a href="/dashboard">Profile</a>
-  <a href="/logout">Logout</a>
-</div>
+    <h2>SharingYatra</h2>
 
-<div class="main">
-  <h1>View All Drivers Details</h1>
-  <% if (error) { %>
-    <div class="alert alert-error"><%= error %></div>
-  <% } %>
-  <% if (drivers.length === 0 && !error) { %>
-    <div class="alert alert-info">No drivers found. Please add a driver to your agency.</div>
-  <% } else { %>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-            <th>License Number</th>
-            <th>Vehicle Model</th>
-            <th>Plate Number</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% drivers.forEach(driver => { %>
-            <tr>
-              <td><%= driver.fullName || '' %></td>
-              <td><%= driver.email || '' %></td>
-              <td><%= driver.mobile || '' %></td>
-              <td><%= driver.licenseNumber || '' %></td>
-              <td><%= driver.assignedVehicle && driver.assignedVehicle.vehicle_name ? driver.assignedVehicle.vehicle_name : '' %></td>
-              <td><%= driver.assignedVehicle && driver.assignedVehicle.number_plate ? driver.assignedVehicle.number_plate : '' %></td>
-              <td class="actions-cell">
-                <button 
-                  class="action-btn edit-btn" 
-                  title="Edit"
-                  data-id="<%= driver._id || '' %>"
-                  data-fullname="<%= driver.fullName || '' %>"
-                  data-email="<%= driver.email || '' %>"
-                  data-phone="<%= driver.mobile || '' %>"
-                  data-license="<%= driver.licenseNumber || '' %>"
-                  data-address="<%= driver.address || '' %>"
-                  data-vehiclemodel="<%= driver.assignedVehicle && driver.assignedVehicle.vehicle_name ? driver.assignedVehicle.vehicle_name : '' %>"
-                  data-vehicleplatenumber="<%= driver.assignedVehicle && driver.assignedVehicle.number_plate ? driver.assignedVehicle.number_plate : '' %>"
-                >
-                  <i class="fa-solid fa-pen-to-square"></i> Edit
-                </button>
-                <button 
-                  class="action-btn delete-btn" 
-                  title="Delete" 
-                  data-id="<%= driver._id || '' %>"
-                >
-                  <i class="fa-solid fa-trash"></i> Delete
-                </button>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+    <button id="menu-toggle" class="menu-toggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar-links">
+        <nav>
+            <a href="/manageBooking"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>
+            <a href="/approvedRides"><i class="fa-solid fa-check-double"></i> Approved Bookings</a>
+            <a href="/addDriver"><i class="fa-solid fa-user-plus"></i> Add Drivers</a>
+            <a href="/viewDriver" class="active"><i class="fa-solid fa-users"></i> View Drivers</a>
+            <a href="/addVehicles"><i class="fa-solid fa-car"></i> Add Vehicles</a>
+            <a href="/viewVehicles"><i class="fa-solid fa-car-side"></i> View Vehicles</a>
+            <a href="/earning"><i class="fa-solid fa-chart-line"></i> Earnings</a>
+            <a href="/dashboard"><i class="fa-solid fa-user-circle"></i> Profile</a>
+        </nav>
+        <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
-  <% } %>
+</div>
+<div class="main">
+    <h1>View All Drivers Details</h1>
+    <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <% if (drivers.length === 0 && !error) { %>
+        <div class="alert alert-info">No drivers found. Please <a href="/addDriver">add a driver</a> to your agency.</div>
+    <% } else { %>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>License Number</th>
+                        <th>Vehicle Model</th>
+                        <th>Plate Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% drivers.forEach(driver => { %>
+                        <tr>
+                            <td><%= driver.fullName || '' %></td>
+                            <td><%= driver.email || '' %></td>
+                            <td><%= driver.mobile || '' %></td>
+                            <td><%= driver.licenseNumber || '' %></td>
+                            <td><%= (driver.assignedVehicle && driver.assignedVehicle.vehicle_name) ? driver.assignedVehicle.vehicle_name : 'N/A' %></td>
+                            <td><%= (driver.assignedVehicle && driver.assignedVehicle.number_plate) ? driver.assignedVehicle.number_plate : 'N/A' %></td>
+                            <td class="actions-cell">
+                                <button 
+                                    class="action-btn edit-btn" 
+                                    title="Edit"
+                                    data-id="<%= driver._id || '' %>"
+                                    data-fullname="<%= driver.fullName || '' %>"
+                                    data-email="<%= driver.email || '' %>"
+                                    data-phone="<%= driver.mobile || '' %>"
+                                    data-license="<%= driver.licenseNumber || '' %>"
+                                    data-address="<%= driver.address || '' %>"
+                                    data-vehiclemodel="<%= (driver.assignedVehicle && driver.assignedVehicle.vehicle_name) ? driver.assignedVehicle.vehicle_name : '' %>"
+                                    data-vehicleplatenumber="<%= (driver.assignedVehicle && driver.assignedVehicle.number_plate) ? driver.assignedVehicle.number_plate : '' %>"
+                                >
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button 
+                                    class="action-btn delete-btn" 
+                                    title="Delete" 
+                                    data-id="<%= driver._id || '' %>"
+                                >
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
 </div>
 
 <div id="editModal" class="modal-overlay">
-  <div class="modal-content">
-    <h2>Edit Driver Details</h2>
-    <form id="editForm" action="/editDriver" method="POST">
-      <input type="hidden" id="editDriverId" name="driverId">
-      <div class="form-group">
-        <label for="editFullName">Full Name</label>
-        <input type="text" id="editFullName" name="fullName" required>
-      </div>
-      <div class="form-group">
-        <label for="editEmail">Email</label>
-        <input type="email" id="editEmail" name="email" required>
-      </div>
-      <div class="form-group">
-        <label for="editPhoneNumber">Phone Number</label>
-        <input type="tel" id="editPhoneNumber" name="phoneNumber" required>
-      </div>
-      <div class="form-group">
-        <label for="editLicenseNumber">License Number</label>
-        <input type="text" id="editLicenseNumber" name="licenseNumber" required>
-      </div>
-      <div class="form-group">
-        <label for="editAddress">Address</label>
-        <input type="text" id="editAddress" name="address">
-      </div>
-      <div class="form-group">
-        <label for="editVehicleModel">Vehicle Model</label>
-        <input type="text" id="editVehicleModel" name="vehicleModel">
-      </div>
-      <div class="form-group">
-        <label for="editVehiclePlateNumber">Plate Number</label>
-        <input type="text" id="editVehiclePlateNumber" name="vehiclePlateNumber">
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="action-btn btn-cancel" onclick="closeModal('editModal')">Cancel</button>
-        <button type="submit" class="action-btn edit-btn">Save Changes</button>
-      </div>
-    </form>
-  </div>
+    <div class="modal-content">
+        <h2>Edit Driver Details</h2>
+        <form id="editForm" action="/editDriver" method="POST">
+            <input type="hidden" id="editDriverId" name="driverId">
+            <div class="form-group">
+                <label for="editFullName">Full Name</label>
+                <input type="text" id="editFullName" name="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="editPhoneNumber">Phone Number</label>
+                <input type="tel" id="editPhoneNumber" name="mobile" required> </div>
+            <div class="form-group">
+                <label for="editLicenseNumber">License Number</label>
+                <input type="text" id="editLicenseNumber" name="licenseNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="editAddress">Address</label>
+                <input type="text" id="editAddress" name="address">
+            </div>
+            <div class="form-group">
+                <label for="editVehicleModel">Vehicle Model</label>
+                <input type="text" id="editVehicleModel" name="vehicleModel" readonly> </div>
+            <div class="form-group">
+                <label for="editVehiclePlateNumber">Plate Number</label>
+                <input type="text" id="editVehiclePlateNumber" name="vehiclePlateNumber" readonly> </div>
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+                <button type="submit" class="action-btn edit-btn" style="color: white; background-color: var(--success);">Save Changes</button> </div>
+        </form>
+    </div>
 </div>
 
 <div id="deleteModal" class="modal-overlay">
-  <div class="modal-content">
-    <h2>Confirm Deletion</h2>
-    <p>Are you sure you want to permanently delete this driver? This action cannot be undone.</p>
-    <form id="deleteForm" action="/deleteDriver" method="POST">
-      <input type="hidden" id="deleteDriverId" name="driverId">
-      <div class="modal-actions">
-        <button type="button" class="action-btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
-        <button type="submit" class="action-btn delete-btn">Delete</button>
-      </div>
-    </form>
-  </div>
+    <div class="modal-content">
+        <h2>Confirm Deletion</h2>
+        <p>Are you sure you want to permanently delete this driver? This action cannot be undone.</p>
+        <form id="deleteForm" action="/deleteDriver" method="POST">
+            <input type="hidden" id="deleteDriverId" name="driverId">
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+                <button type="submit" class="action-btn delete-btn">Delete</button>
+            </div>
+        </form>
+    </div>
 </div> 
 
 <script>
 function openModal(modalId) {
-  document.getElementById(modalId).style.display = 'flex';
+    document.getElementById(modalId).style.display = 'flex';
 }
 function closeModal(modalId) {
-  document.getElementById(modalId).style.display = 'none';
+    document.getElementById(modalId).style.display = 'none';
 }
+
+// Combined both scripts inside one DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('editDriverId').value = btn.dataset.id || '';
-      document.getElementById('editFullName').value = btn.dataset.fullname || '';
-      document.getElementById('editEmail').value = btn.dataset.email || '';
-      document.getElementById('editPhoneNumber').value = btn.dataset.phone || '';
-      document.getElementById('editLicenseNumber').value = btn.dataset.license || '';
-      document.getElementById('editAddress').value = btn.dataset.address || '';
-      document.getElementById('editVehicleModel').value = btn.dataset.vehiclemodel || '';
-      document.getElementById('editVehiclePlateNumber').value = btn.dataset.vehicleplatenumber || '';
-      openModal('editModal');
+
+    // --- Sidebar Toggle Functionality ---
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+        document.querySelector('.sidebar-links').classList.toggle('open');
     });
-  });
-  document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('deleteDriverId').value = btn.dataset.id || '';
-      openModal('deleteModal');
+
+    // --- Modal Functionality ---
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Stop propagation if the button is inside the modal
+            e.stopPropagation(); 
+            
+            const driverId = btn.dataset.id || '';
+            if (!driverId) return; // Don't open modal if button is not in table
+
+            document.getElementById('editDriverId').value = driverId;
+            document.getElementById('editFullName').value = btn.dataset.fullname || '';
+            document.getElementById('editEmail').value = btn.dataset.email || '';
+            document.getElementById('editPhoneNumber').value = btn.dataset.phone || '';
+            document.getElementById('editLicenseNumber').value = btn.dataset.license || '';
+            document.getElementById('editAddress').value = btn.dataset.address || '';
+            document.getElementById('editVehicleModel').value = btn.dataset.vehiclemodel || '';
+            document.getElementById('editVehiclePlateNumber').value = btn.dataset.vehicleplatenumber || '';
+            openModal('editModal');
+        });
     });
-  });
-  window.onclick = function(event) {
-    if (event.target.classList.contains('modal-overlay')) {
-      closeModal('editModal');
-      closeModal('deleteModal');
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const driverId = btn.dataset.id || '';
+            if (!driverId) return;
+
+            document.getElementById('deleteDriverId').value = driverId;
+            openModal('deleteModal');
+        });
+    });
+    
+    // Close modal on overlay click
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            closeModal('editModal');
+            closeModal('deleteModal');
+        }
     }
-  }
 });
 </script>
 </body>
