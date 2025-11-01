@@ -501,99 +501,95 @@ router.post('/rejectbooking', isAuthenticated, async (req, res) => {
     }
 });
 
-
-/**
- * Fetches and calculates earnings data for a specific agency within a date range.
- *
- * @param {string} agencyId - The ID of the agency.
- * @param {string} startDate - The start date in "YYYY-MM-DD" format.
- * @param {string} endDate - The end date in "YYYY-MM-DD" format.
- * @returns {Promise<object>} An object containing totalEarnings and driverEarnings array.
- */async function getEarningsData(agencyId, startDate, endDate) {
+async function getEarningsData(agencyId, startDate, endDate) {
     
-    // 1. Convert your YYYY-MM-DD form inputs into real Date objects.
-    // (e.g., "2025-11-01" -> 2025-11-01T00:00:00.000Z)
+    // Convert your YYYY-MM-DD form inputs into real Date objects.
     const startOfDay = new Date(startDate); 
-
-    // (e.g., "2025-11-30" -> 2025-11-30T23:59:59.999Z)
     const endOfDay = new Date(endDate);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
-    const completedBookings = await Booking.find({
-        agencyId: agencyId,
-        status: 'completed',
-        
-        // --- THIS IS THE NEW QUERY LOGIC ---
-        // We use $expr to run a complex comparison operation
-        $expr: {
-            // $and combines our two conditions ($gte and $lte)
-            $and: [
-                // Condition 1: Is the booking date "greater than or equal to" startOfDay?
-                {
-                    $gte: [
-                        { 
-                            // Convert the 'date' field (a string) into a Date object
-                            $dateFromString: {
-                                dateString: '$date',
-                                format: '%d/%m/%Y' // <-- CRITICAL: Assumes "Day/Month/Year" format
-                            }
-                        },
-                        startOfDay // The Date object from our form
-                    ]
-                },
-                // Condition 2: Is the booking date "less than or equal to" endOfDay?
-                {
-                    $lte: [
-                        {
-                            // Convert the 'date' field (a string) into a Date object
-                            $dateFromString: {
-                                dateString: '$date',
-                                format: '%d/%m/%Y' // <-- CRITICAL: Assumes "Day/Month/Year" format
-                            }
-                        },
-                        endOfDay // The Date object from our form
-                    ]
-                }
-            ]
-        }
-        // --- END OF NEW QUERY LOGIC ---
-    });
-
-    // The rest of your function is perfect, no changes needed here
-    let totalEarnings = 0;
-    const driverMap = new Map();
-    
-    for (const booking of completedBookings) {
-        const fare = Number(booking.fare) || 0;
-        totalEarnings += fare;
-        
-        if (booking.driverID && booking.driverName) {
-            const driverId = booking.driverID.toString();
-            const driverName = booking.driverName;
+    try {
+        const completedBookings = await Booking.find({
+            agencyId: agencyId,
+            status: 'completed',
             
-            if (driverMap.has(driverId)) {
-                driverMap.get(driverId).total += fare;
-            } else {
-                driverMap.set(driverId, { name: driverName, total: fare });
+            // We use $expr to run a complex comparison operation
+            $expr: {
+                $and: [
+                    // Condition 1: Is the booking date >= startOfDay?
+                    {
+                        $gte: [
+                            { 
+                                $dateFromString: {
+                                    dateString: '$date',
+                                    // --- THIS IS THE FIX ---
+                                    // Match your database format: "YYYY-MM-DD"
+                                    format: '%Y-%m-%d' 
+                                }
+                            },
+                            startOfDay
+                        ]
+                    },
+                    // Condition 2: Is the booking date <= endOfDay?
+                    {
+                        $lte: [
+                            {
+                                $dateFromString: {
+                                    dateString: '$date',
+                                    // --- THIS IS THE FIX ---
+                                    // Match your database format: "YYYY-MM-DD"
+                                    format: '%Y-%m-%d'
+                                }
+                            },
+                            endOfDay
+                        ]
+                    }
+                ]
+            }
+        });
+
+        // The rest of your function is correct
+        let totalEarnings = 0;
+        const driverMap = new Map();
+        
+        for (const booking of completedBookings) {
+            const fare = Number(booking.fare) || 0;
+            totalEarnings += fare;
+            
+            if (booking.driverID && booking.driverName) {
+                const driverId = booking.driverID.toString();
+                const driverName = booking.driverName;
+                
+                if (driverMap.has(driverId)) {
+                    driverMap.get(driverId).total += fare;
+                } else {
+                    driverMap.set(driverId, { name: driverName, total: fare });
+                }
             }
         }
-    }
-    
-    const driverEarnings = [];
-    for (const [driverId, data] of driverMap.entries()) {
-        const contribution = (totalEarnings > 0) ? (data.total / totalEarnings) * 100 : 0;
-        driverEarnings.push({
-            name: data.name,
-            total: data.total,
-            contribution: contribution.toFixed(2)
-        });
-    }
-    
-    driverEarnings.sort((a, b) => b.total - a.total);
-    
-    return { totalEarnings, driverEarnings };
-}
+        
+        const driverEarnings = [];
+        for (const [driverId, data] of driverMap.entries()) {
+            const contribution = (totalEarnings > 0) ? (data.total / totalEarnings) * 100 : 0;
+            driverEarnings.push({
+                name: data.name,
+                total: data.total,
+                contribution: contribution.toFixed(2)
+            });
+        }
+        
+        driverEarnings.sort((a, b) => b.total - a.total);
+        
+        // Success: return the calculated data
+        return { totalEarnings, driverEarnings };
 
+    } catch (err) {
+        // If the query fails (like a format mismatch), log it and re-throw
+        console.error("Error during getEarningsData aggregation:", err);
+        // This will be caught by your main router's catch block
+        throw new Error("Failed to query earnings data."); 
+    }
+}
 
 
 router.get('/earning', isAuthenticated, async (req, res) => {
@@ -654,5 +650,6 @@ router.post('/earning', isAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
