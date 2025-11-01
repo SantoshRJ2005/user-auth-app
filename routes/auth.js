@@ -509,32 +509,57 @@ router.post('/rejectbooking', isAuthenticated, async (req, res) => {
  * @param {string} startDate - The start date in "YYYY-MM-DD" format.
  * @param {string} endDate - The end date in "YYYY-MM-DD" format.
  * @returns {Promise<object>} An object containing totalEarnings and driverEarnings array.
- */
-async function getEarningsData(agencyId, startDate, endDate) {
+ */async function getEarningsData(agencyId, startDate, endDate) {
     
-    // --- FIX: Create correct date range ---
-    
-    // 1. Create a Date object from the startDate string.
-    // This correctly becomes the start of the day (e.g., "2025-11-01T00:00:00.000Z")
+    // 1. Convert your YYYY-MM-DD form inputs into real Date objects.
+    // (e.g., "2025-11-01" -> 2025-11-01T00:00:00.000Z)
     const startOfDay = new Date(startDate); 
 
-    // 2. Create a Date object from the endDate string.
+    // (e.g., "2025-11-30" -> 2025-11-30T23:59:59.999Z)
     const endOfDay = new Date(endDate);
-
-    // 3. Set the endOfDay to the *very end* of that day in UTC.
-    // This ensures you include all bookings *during* the entire endDate.
     endOfDay.setUTCHours(23, 59, 59, 999);
-    // --- End of Fix ---
 
     const completedBookings = await Booking.find({
         agencyId: agencyId,
         status: 'completed',
-        date: { 
-            $gte: startOfDay, // Use the new start-of-day Date object
-            $lte: endOfDay    // Use the modified end-of-day Date object
+        
+        // --- THIS IS THE NEW QUERY LOGIC ---
+        // We use $expr to run a complex comparison operation
+        $expr: {
+            // $and combines our two conditions ($gte and $lte)
+            $and: [
+                // Condition 1: Is the booking date "greater than or equal to" startOfDay?
+                {
+                    $gte: [
+                        { 
+                            // Convert the 'date' field (a string) into a Date object
+                            $dateFromString: {
+                                dateString: '$date',
+                                format: '%d/%m/%Y' // <-- CRITICAL: Assumes "Day/Month/Year" format
+                            }
+                        },
+                        startOfDay // The Date object from our form
+                    ]
+                },
+                // Condition 2: Is the booking date "less than or equal to" endOfDay?
+                {
+                    $lte: [
+                        {
+                            // Convert the 'date' field (a string) into a Date object
+                            $dateFromString: {
+                                dateString: '$date',
+                                format: '%d/%m/%Y' // <-- CRITICAL: Assumes "Day/Month/Year" format
+                            }
+                        },
+                        endOfDay // The Date object from our form
+                    ]
+                }
+            ]
         }
+        // --- END OF NEW QUERY LOGIC ---
     });
 
+    // The rest of your function is perfect, no changes needed here
     let totalEarnings = 0;
     const driverMap = new Map();
     
@@ -542,9 +567,6 @@ async function getEarningsData(agencyId, startDate, endDate) {
         const fare = Number(booking.fare) || 0;
         totalEarnings += fare;
         
-        // Your original logic below is correct.
-        // It aggregates earnings by driver, but only if the
-        // booking has both a driverID and a driverName.
         if (booking.driverID && booking.driverName) {
             const driverId = booking.driverID.toString();
             const driverName = booking.driverName;
@@ -567,11 +589,12 @@ async function getEarningsData(agencyId, startDate, endDate) {
         });
     }
     
-    // Sort the leaderboard from highest earner to lowest
     driverEarnings.sort((a, b) => b.total - a.total);
     
     return { totalEarnings, driverEarnings };
 }
+
+
 
 router.get('/earning', isAuthenticated, async (req, res) => {
     // ... (rest of your route)
@@ -631,4 +654,5 @@ router.post('/earning', isAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+
 
