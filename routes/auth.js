@@ -501,22 +501,54 @@ router.post('/rejectbooking', isAuthenticated, async (req, res) => {
     }
 });
 
-// --- Earnings Routes (Unchanged) ---
+
+/**
+ * Fetches and calculates earnings data for a specific agency within a date range.
+ *
+ * @param {string} agencyId - The ID of the agency.
+ * @param {string} startDate - The start date in "YYYY-MM-DD" format.
+ * @param {string} endDate - The end date in "YYYY-MM-DD" format.
+ * @returns {Promise<object>} An object containing totalEarnings and driverEarnings array.
+ */
 async function getEarningsData(agencyId, startDate, endDate) {
-    // ... (function code)
+    
+    // --- FIX: Create correct date range ---
+    
+    // 1. Create a Date object from the startDate string.
+    // This correctly becomes the start of the day (e.g., "2025-11-01T00:00:00.000Z")
+    const startOfDay = new Date(startDate); 
+
+    // 2. Create a Date object from the endDate string.
+    const endOfDay = new Date(endDate);
+
+    // 3. Set the endOfDay to the *very end* of that day in UTC.
+    // This ensures you include all bookings *during* the entire endDate.
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    // --- End of Fix ---
+
     const completedBookings = await Booking.find({
         agencyId: agencyId,
         status: 'completed',
-        date: { $gte: startDate, $lte: endDate } 
+        date: { 
+            $gte: startOfDay, // Use the new start-of-day Date object
+            $lte: endOfDay    // Use the modified end-of-day Date object
+        }
     });
+
     let totalEarnings = 0;
     const driverMap = new Map();
+    
     for (const booking of completedBookings) {
         const fare = Number(booking.fare) || 0;
         totalEarnings += fare;
+        
+        // Your original logic below is correct.
+        // It aggregates earnings by driver, but only if the
+        // booking has both a driverID and a driverName.
         if (booking.driverID && booking.driverName) {
             const driverId = booking.driverID.toString();
             const driverName = booking.driverName;
+            
             if (driverMap.has(driverId)) {
                 driverMap.get(driverId).total += fare;
             } else {
@@ -524,6 +556,7 @@ async function getEarningsData(agencyId, startDate, endDate) {
             }
         }
     }
+    
     const driverEarnings = [];
     for (const [driverId, data] of driverMap.entries()) {
         const contribution = (totalEarnings > 0) ? (data.total / totalEarnings) * 100 : 0;
@@ -533,7 +566,10 @@ async function getEarningsData(agencyId, startDate, endDate) {
             contribution: contribution.toFixed(2)
         });
     }
+    
+    // Sort the leaderboard from highest earner to lowest
     driverEarnings.sort((a, b) => b.total - a.total);
+    
     return { totalEarnings, driverEarnings };
 }
 
@@ -595,3 +631,4 @@ router.post('/earning', isAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+
